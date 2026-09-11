@@ -1,27 +1,21 @@
 # Oppgave 1.1 - Beregn tidsbruk
 def calculate_time():
+
     gather_data = True
+
     while gather_data:
-
-        study_sessions = input('Hvor mange studieøkter har du deltatt i til nå? ')
-        if not study_sessions.isdigit() or study_sessions == "0":
-            print('Beklager. Jeg forstår ikke svaret ditt. Prøv igjen og svar kun med hele tall (høyere enn "0").')
+        try:
+            study_sessions = int(input('Hvor mange studieøkter har du deltatt i til nå? '))
+            minutes_per_sessions = int(input('Hvor mange minutter varer hver økt? '))
+        except:
+            print('Beklager. Jeg forstår ikke svarene dine. Prøv igjen og svar kun med hele tall (høyere enn "0").')
             continue
-
-        minutes_per_sessions = input('Hvor mange minutter varer hver økt? ')
-        if not minutes_per_sessions.isdigit() or minutes_per_sessions == "0":
-            print('Beklager. Jeg forstår ikke svaret ditt. Prøv igjen og svar kun med hele tall (høyere enn "0").')
-            continue
-
-        gather_data = False
-
-    study_sessions = int(study_sessions)
-    minutes_per_sessions = int(minutes_per_sessions)
+        else:
+            gather_data = False
 
     minutes = study_sessions * minutes_per_sessions
     hours = minutes // 60
     minutes_left = minutes % 60
-
 
     print(f'Antall studieøkter: {study_sessions}')
     print(f'Minutter per økt: {minutes_per_sessions}')
@@ -50,15 +44,12 @@ def analyze_numbers():
 
     while gather_values:
 
-        start_value = input('Vennligst tast inn en startverdi: (bare heltall)')
-        stop_value = input('Vennligst tast inn en stoppverdi: (bare heltall)')
-
-        if not start_value.isdigit() or not stop_value.isdigit():
-            print('Beklager, jeg forstår ikke. Prøv igjen (kun heltall)')
+        try:
+            start_value = int(input('Vennligst tast inn en startverdi: (bare heltall)'))
+            stop_value = int(input('Vennligst tast inn en stoppverdi: (bare heltall)'))
+        except:
+            print('Beklager, jeg forstår ikke svarene dine. Prøv igjen (kun heltall).')
             continue
-
-        start_value = int(start_value)
-        stop_value = int(stop_value)
 
         if stop_value < start_value:
             print('Beklager, men stoppverdien kan ikke være lavere enn startverdien! Prøv på nytt')
@@ -91,20 +82,23 @@ def choose_program():
         print('3. Analyser Tallintervall')
         print('4. Avslutt')
 
-        choice = input('Vennligst tast 1-4 for å velge: ')
-        if not choice.isdigit():
-            print('\nBeklager, jeg forstår ikke svaret ditt. Vennlist prøv igjen') # Starting with new line to create space between menu and error
-        elif int(choice) not in range(1, 5):
-            print('\nJeg godtar kun valg mellom 1 og 4') # Starting with new line to create space between menu and error
+        try:
+            choice = int(input('Vennligst tast 1-4 for å velge: '))
+        except:
+            print('\nBeklager, jeg forstår ikke valget ditt. Vennlist prøv igjen') # Starting with new line to create space between menu and error
+            continue
 
-        elif choice == "1":
+        if choice not in range(1, 5):
+            print('\nJeg godtar kun valg mellom 1 og 4') # Starting with new line to create space between menu and error
+            continue
+        elif choice == 1:
             calculate_time()
-        elif choice == "2":
+        elif choice == 2:
             analyze_text()
-        elif choice == "3":
+        elif choice == 3:
             analyze_numbers()
         else:
-            print('\nTakk for at du brukte dette programmet. Programmet avsluttes. ') # To create space between menu and this message
+            print('\nTakk for at du brukte dette programmet. Programmet avsluttes. ') # New line to create space between menu and this message
             menu_on = False
 choose_program()
 
