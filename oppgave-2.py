@@ -78,7 +78,7 @@ def search_topic():
         if new_search.isspace() or new_search == "":
             print("Beklager, jeg forstår ikke søket ditt. Prøv igjen.")
             continue
-        elif new_search.lower() not in study_sessions.split().lower():
+        elif new_search.lower() not in #study_sessions.split().lower():
             print("Beklager. Ingen treff som samsvarte med søket ditt.")
             search_on = False
         else:
