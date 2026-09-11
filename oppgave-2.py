@@ -75,16 +75,22 @@ def search_topic():
     while search_on:
 
         new_search = input("Vennligst tast inn et søkeord: ")
+
         if new_search.isspace() or new_search == "":
             print("Beklager, jeg forstår ikke søket ditt. Prøv igjen.")
             continue
-        elif new_search.lower() not in #study_sessions.split().lower():
-            print("Beklager. Ingen treff som samsvarte med søket ditt.")
-            search_on = False
         else:
-            for dicts in study_sessions:
-                if new_search.lower() == dicts["status"].lower():
-                    print(dicts)
+            search_result = [s for s in study_sessions if s["topic"].lower() == new_search.lower()]
+
+        if len(search_result) == 0:
+            print("Beklager. Ingen treff som samsvarte med søket ditt.")
+        else:
+            for search in search_result:
+                print('\nSearch results:') # Starting with new line to create space between this print and previous ones
+                for k, v in search.items():
+                    print(k.capitalize() + ":", v)
+
+        search_on = False
 
 
 search_topic()
