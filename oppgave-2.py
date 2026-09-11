@@ -47,11 +47,11 @@ def register_session():
     return add_dict
 
 
-def display_sessions():
-    if study_sessions == []:
+def display_sessions(dict_list):
+    if dict_list == []:
         print('Beklager. Det finnes ingen studieøkter registrert ennå.')
     else:
-        for dicts in study_sessions:
+        for dicts in dict_list:
             print("")
             for k,v in dicts.items():
                 print(k.capitalize()+':',v)
@@ -80,7 +80,7 @@ def search_topic():
             print("Beklager, jeg forstår ikke søket ditt. Prøv igjen.")
             continue
         else:
-            search_result = [s for s in study_sessions if s["topic"].lower() == new_search.lower()]
+            search_result = [s for s in study_sessions if new_search.lower() in s["topic"].lower()]
 
         if len(search_result) == 0:
             print("Beklager. Ingen treff som samsvarte med søket ditt.")
@@ -93,18 +93,65 @@ def search_topic():
         search_on = False
 
 
-search_topic()
+def sort_duration():
+    from operator import itemgetter
+
+    print('Sorterer... ')
+    print('Sortering vellyket! Bruk menyvalg 2 for å se oppdatert liste over dine studieøkter, sortert etter varighet.')
+
+    return sorted(study_sessions, reverse=True, key = itemgetter('duration_minutes'))
 
 
-# sort_duration()
-    # If no result, print clear message
+def display_duration_completed():
+    counter = 0
+    for d in study_sessions:
+        if d["status"] == "completed":
+            counter += d["duration_minutes"]
 
-# display_duration_completed()
-    # If no result, print clear message
+    if len(study_sessions) == 0:
+        print('Beklager, det ser ut til at du ikke fullført noen studieøkter ennå.')
+    else:
+        print(f'Samlet varighet for fullførte økter: {counter}')
+        print(f'Gjennomsnittlig varighet for fullførte økter: {counter / len(study_sessions):.0f}')
 
-# close_program()
 
-#menu_on: pass
- #study_sessions.append(register_session())
- #print(study_sessions[5])
-# Clear error message if non-valid menu choice
+def choose_program():
+    menu_on = True
+
+    while menu_on:
+        print('\n') # To create space between every new menu display
+        print('Vennligst velg program fra menyen ved å taste inn nummererte valg 1-3 eller avslutt med "4": ')
+        print('1. Registrer en studieøkt')
+        print('2. Vis alle studieøkter')
+        print('3. Vis kun fullførte studieøkter')
+        print('4. Søk etter tema')
+        print('5. Sorter øktene etter varighet (fra lengst til kortest)')
+        print('6. Vis samlet og gjennomsnittlig varighet for fullførte økter')
+        print('7. Avslutt')
+
+
+        try:
+            choice = int(input('Vennligst tast 1-7 for å velge: '))
+        except:
+            print('\nBeklager, jeg forstår ikke valget ditt. Vennlist prøv igjen') # Starting with new line to create space between menu and error
+            continue
+
+        if choice not in range(1, 8):
+            print('\nJeg godtar kun valg mellom 1 og 7') # Starting with new line to create space between menu and error
+            continue
+        elif choice == 1:
+            study_sessions.append(register_session())
+        elif choice == 2:
+            display_sessions(study_sessions)
+        elif choice == 3:
+            display_completed()
+        elif choice == 4:
+            search_topic()
+        elif choice == 5:
+            study_sessions = sort_duration()
+        elif choice == 6:
+            display_duration_completed()
+        else:
+            print('\nTakk for at du brukte dette programmet. Programmet avsluttes. ') # New line to create space between menu and this message
+            menu_on = False
+choose_program()
