@@ -101,9 +101,3 @@ def choose_program():
             print('\nTakk for at du brukte dette programmet. Programmet avsluttes. ') # New line to create space between menu and this message
             menu_on = False
 choose_program()
-
-
-
-
-
-
