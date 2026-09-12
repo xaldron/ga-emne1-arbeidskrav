@@ -57,8 +57,8 @@ def display_sessions(dict_list):
                 print(k.capitalize()+':',v)
 
 
-def display_completed():
-    completed_sessions = [s for s in study_sessions if s["status"] == "completed"]
+def display_completed(dict_list):
+    completed_sessions = [s for s in dict_list if s["status"] == "completed"]
 
     if not completed_sessions:
         print("Ingen fullførte studieøkter funnet.")
@@ -69,7 +69,7 @@ def display_completed():
             print(k.capitalize() + ":", v)
 
 
-def search_topic():
+def search_topic(dict_list):
 
     search_on = True
     while search_on:
@@ -80,7 +80,7 @@ def search_topic():
             print("Beklager, jeg forstår ikke søket ditt. Prøv igjen.")
             continue
         else:
-            search_result = [s for s in study_sessions if new_search.lower() in s["topic"].lower()]
+            search_result = [s for s in dict_list if new_search.lower() in s["topic"].lower()]
 
         if len(search_result) == 0:
             print("Beklager. Ingen treff som samsvarte med søket ditt.")
@@ -93,29 +93,29 @@ def search_topic():
         search_on = False
 
 
-def sort_duration():
+def sort_duration(dict_list):
     from operator import itemgetter
 
     print('Sorterer... ')
     print('Sortering vellyket! Bruk menyvalg 2 for å se oppdatert liste over dine studieøkter, sortert etter varighet.')
 
-    return sorted(study_sessions, reverse=True, key = itemgetter('duration_minutes'))
+    return sorted(dict_list, reverse=True, key = itemgetter('duration_minutes'))
 
 
-def display_duration_completed():
+def display_duration_completed(dict_list):
     counter = 0
-    for d in study_sessions:
+    for d in dict_list:
         if d["status"] == "completed":
             counter += d["duration_minutes"]
 
-    if len(study_sessions) == 0:
+    if len(dict_list) == 0:
         print('Beklager, det ser ut til at du ikke fullført noen studieøkter ennå.')
     else:
         print(f'Samlet varighet for fullførte økter: {counter}')
-        print(f'Gjennomsnittlig varighet for fullførte økter: {counter / len(study_sessions):.0f}')
+        print(f'Gjennomsnittlig varighet for fullførte økter: {counter / len(dict_list):.0f}')
 
 
-def choose_program():
+def choose_program(dict_list):
     menu_on = True
 
     while menu_on:
@@ -140,18 +140,20 @@ def choose_program():
             print('\nJeg godtar kun valg mellom 1 og 7') # Starting with new line to create space between menu and error
             continue
         elif choice == 1:
-            study_sessions.append(register_session())
+            dict_list.append(register_session())
         elif choice == 2:
-            display_sessions(study_sessions)
+            display_sessions(dict_list)
         elif choice == 3:
-            display_completed()
+            display_completed(dict_list)
         elif choice == 4:
-            search_topic()
+            search_topic(dict_list)
         elif choice == 5:
-            study_sessions = sort_duration()
+            dict_list = sort_duration(dict_list)
         elif choice == 6:
-            display_duration_completed()
+            display_duration_completed(dict_list)
         else:
             print('\nTakk for at du brukte dette programmet. Programmet avsluttes. ') # New line to create space between menu and this message
             menu_on = False
-choose_program()
+
+
+choose_program(study_sessions)
