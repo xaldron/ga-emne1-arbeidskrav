@@ -1,21 +1,27 @@
-import datetime
+from datetime import datetime, date, time, timedelta
 
-def add_date():
+test_date = input('Vennligst oppgi en dato (dd.mm.åååå): ')
+
+def add_date(new_date):
     '''take in a date with dd.mm.yyyy format and return the date'''
-    get_date = True
-    while get_date:
-        try:
-            date_string = input('Vennligst oppgi en dato (dd.mm.åååå): ')
-            user_date = datetime.date.strptime(date_string, "%d.%m.%Y")
-        except:
-            print('Beklager, det ser ut til at du har oppgitt en ugyldig dato. Vennligst prøv igjen (dd.mm.åååå')
-            continue
-        get_date = False
-    return user_date
+    try:
+        return date.strptime(new_date, "%d.%m.%Y")
+    except:
+        print('Beklager, det ser ut til at du har oppgitt en ugyldig dato. Vennligst prøv igjen (dd.mm.åååå)')
 
-def start_end():
+
+
+
+my_time = time(13, 00)
+
+def start_end(start_time, minutes):
     '''Take in start time and minutes and returns endtime'''
-    pass
+    try:
+        return timedelta.time.strptime(start_time, "%h:%m") == time(minutes)
+    except:
+        print('Beklager, det ser ut til at du har oppgitt et ugyldig tidspunkt. Vennligst prøv igjen (tt:mm)')
+
+print(start_end(my_time, 60))
 
 def days_between():
     '''Take inn two dates and return (positive) days between them'''
