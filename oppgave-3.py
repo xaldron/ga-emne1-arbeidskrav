@@ -12,7 +12,7 @@ def add_date(new_date):
 
 
 
-my_time = time(13, 00)
+#my_time = time(13, 00)
 
 def start_end(start_time, duration_in_minutes):
     '''Take in start time and minutes and returns endtime'''
@@ -20,18 +20,17 @@ def start_end(start_time, duration_in_minutes):
     return new_time.strftime("%H:%M:%S")
 
 
-
-
-one_date = date(1998, 6, 26)
-another_date = date(1990, 12, 18)
-
 def days_between(date_1, date_2):
     '''Take inn two dates and return (positive) days between them'''
     return abs((date_1 - date_2).days)
 
 
-def list_of_dates_sorted():
+def list_of_dates_sorted(date_list):
     '''Take in a list of datoes and return a chronologically sorted list'''
-    pass
+    return sorted(date_list)
+
+
+
+
 
 
