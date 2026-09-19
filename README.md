@@ -1010,6 +1010,12 @@ Sekund (00–59)
 
 Ved å bruke dette mønsteret oppnår du full kontroll på feilhåndtering, oppfyller kravene i oppgaven optimalt, og unngår unødig tidsbruk på formatfeil.
 
+**Oppgave 4**
+I denne oppgaven har en medstudent tipset om csv reader funksjonen og følgende lenke i en felles discord-kanal. Jeg ser for meg at jeg kommer til å bruke denne funksjonen i oppgaven:
+https://www.geeksforgeeks.org/pandas/reading-csv-files-in-python/
+
+
+
  
 
 
