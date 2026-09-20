@@ -1011,8 +1011,15 @@ Sekund (00–59)
 Ved å bruke dette mønsteret oppnår du full kontroll på feilhåndtering, oppfyller kravene i oppgaven optimalt, og unngår unødig tidsbruk på formatfeil.
 
 **Oppgave 4**
+
 I denne oppgaven har en medstudent tipset om csv reader funksjonen og følgende lenke i en felles discord-kanal. Jeg ser for meg at jeg kommer til å bruke denne funksjonen i oppgaven:
 https://www.geeksforgeeks.org/pandas/reading-csv-files-in-python/
+
+Til å begynne med lagde jeg funksjoner for hver deloppgave under 4.2 som lignet veldig på funksjonen i oppgave 4.1. Jeg innså etterhvert at dette ble veldig repeterende, og spurte den 
+KI om det ville være lurt å lage en funksjon som returnerte alle gyldige rader. KI mente dette var en god ide, og kom med forslag til flere omskrivninger av funksjonene jeg allerede hadde lagd.
+Litt synd at flere av funksjonene/oppgave 4.2 nå ser ut som den utelukkende er skrevet av KI ettersom jeg hadde lagt ned mye jobb i egne funksjoner. Men, samtidig ble forslagene den kom med litt for gode til å ignorere
+ettersom de da var svært lesbare. Her burde jeg bedt KI-en om ikke å komme med forslag, men kun svare på om jeg burde løse det sånn eller ikke. Promp og KI-svar i sin helhet under prompt 2.
+Unntakene er most_tickets og unsolved_tickets_sorted som jeg har skrivd selv.
 
 
 
@@ -1082,10 +1089,147 @@ print(ticket_time_spent())
 
 *(Merk også at du kan hente ut verdien direkte med `int(row['minutes'])` i staden for ei indre `for k,v in row.items()`-løkke for å redusere unødvendige iterasjonar og gjere koden meir effektiv).*
 
+**prompt 2**
+hmmm, er det slik at eg burde/kunne ha laga ein funksjon/brukt valid_ticket_count som returnerer kun dei gyldige radene i fila, og deretter bruk denne funksjonen som parameter/argument i dei andre ( i staden for samme ifs og elifs i kvar funksjon)? Eller er det greit slik det står no? 
 
+**Svar:**
+Ja, det er ein **svært god idé!** Faktisk er det mykje betre og meir i tråd med gode programmeringsprinsipp enn å gjenta dei same `if`/`elif`-sjekkane og filopningane i kvar enkelt funksjon.
 
+Her er ein gjennomgang av kvifor dette er lurt, og korleis du kan tenkje rundt det:
 
- 
+---
+
+**Kvifor det er betre å samle dette i éin funksjon**
+
+**1. DRY-prinsippet (*Don't Repeat Yourself*)**
+Akkurat no har du identisk valideringslogikk og `with open(...)` gjentatt fire gonger. Dersom kriteria for kva som er ein gyldig supporthenvendelse endrar seg (t.d. at eit nytt felt må sjekkast), må du i dag hugse å oppdatere koden på fire ulike stader. Samlar du dette i éin funksjon, treng du berre gjere endringa éin stad.
+
+**2. Yting og filhandtering**
+Slik koden står no, opnar og les kvar funksjon heile CSV-fila frå disk på nytt. Dersom du har ein funksjon som hentar ut og returnerer ei liste med gyldige rader, kan du lese fila éin gong og deretter sende denne lista vidare inn som argument til dei ulike analysefunksjonane.
+
+**3. *Single Responsibility Principle* (Kvar funksjon gjer éin ting)**
+Når ein funksjon som `ticket_time_spent()` slepp å opne filer og filtrere ut ugyldige rader, kan den fokusere utelukkande på det den faktisk skal gjere: å rekne ut samla og gjennomsnittleg tid. Dette gjer funksjonane mykje kortare, meir lesbare og enklare å teste.
+
+---
+
+**Korleis det kan sjå ut i praksis**
+
+**1. Ein funksjon som hentar og returnerer gyldige saker**
+Du kan la ein funksjon (t.d. `get_valid_tickets()` eller ei tilpassa utgåve av `valid_ticket_count()`) lese fila og returnere ei rein liste med dei gyldige ordbøkene:
+
+```python
+def get_valid_tickets():
+    valid_rows = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        content = csv.DictReader(file)
+        for row in content:
+            if "" in row.values():
+                continue
+            elif int(row['id']) < 1:
+                continue
+            elif not row['minutes'].isdigit() or int(row['minutes']) < 0:
+                continue
+            elif row['is_resolved'] not in ("yes", "no"):
+                continue
+            else:
+                valid_rows.append(row)
+    return valid_rows
+```
+
+**2. Sende dei gyldige radene inn som argument til dei andre funksjonane**
+Då vert dei andre funksjonane dine mykje enklare og meir konsise:
+
+```python
+def ticket_per_category(tickets):
+    categories = [row["category"] for row in tickets]
+    return Counter(categories)
+
+def ticket_time_spent(tickets):
+    if not tickets:
+        return (0, 0.0)
+    
+    total_minutes = sum(int(row["minutes"]) for row in tickets)
+    avg_minutes = round(total_minutes / len(tickets), 1)
+    return total_minutes, avg_minutes
+
+def tickets_solved_unsolved(tickets):
+    solved = sum(1 for row in tickets if row["is_resolved"] == "yes")
+    unsolved = len(tickets) - solved
+    return solved, unsolved
+```
+
+Og køyringa/utskrifta vert ryddig og samla:
+
+```python
+valid_tickets = get_valid_tickets()
+
+print(f"Tal på gyldige saker: {len(valid_tickets)}")
+print(f"Tidsbruk: {ticket_time_spent(valid_tickets)}")
+print(f"Kategoriar: {ticket_per_category(valid_tickets)}")
+print(f"Løyst / uløyst: {tickets_solved_unsolved(valid_tickets)}")
+```
+
+---
+
+**Er det greit slik det står no?**
+
+- **Funksjonelt:** Ja, koden din gjer det den skal og gir rette svar.
+- **Kvalitetsmessig (for eit arbeidskrav):** Å refaktorere til ein felles funksjon som filtrerer dataa og sender dei vidare viser mykje større forståing for god kodestruktur, modularitet og gjenbruk.
+
+Dersom oppgåveteksten ikkje krev at kvar funksjon *må* ha ein heilt bestemt signatur utan parametrar, er denne refaktoreringa absolutt å tilrå!
+
+**subprompt 2**:
+kan du bryte ned denne for meg som du skrev? Skjønner for eksmepel ikke helt hva 1 representerer. Er det litt det samme som += 1 om det hadde vært i en løkke? `solved = sum(1 for row in tickets if row["is_resolved"] == "yes")`
+**svar:**
+Ja, du har **heilt rett!** Det er i praksis nøyaktig det same som å gjere `solved += 1` inni ei vanleg for-løkke.
+
+Her er ei stegvis nedbryting av korleis dette uttrykket fungerer.
+
+---
+
+**Kva uttrykket gjer steg for steg**
+
+Linja:
+```python
+solved = sum(1 for row in tickets if row["is_resolved"] == "yes")
+```
+nyttar noko som heiter eit **generatoruttrykk** (*generator expression*) saman med den innebygde `sum()`-funksjonen.
+
+1. **`for row in tickets`**: Går gjennom kvar henvendelse i lista `tickets`.
+2. **`if row["is_resolved"] == "yes"`**: Sjekkar om henvendelsen er markert som løyst. Dersom den *ikkje* er løyst, blir rada ignorert.
+3. **`1` (fremst)**: For kvar rad som oppfyller `if`-kravet, genererer uttrykket talet `1`. Dersom det finst 5 løyste saker, vil uttrykket produsere fem `1`-tal (`1, 1, 1, 1, 1`).
+4. **`sum(...)`**: Tek imot alle `1`-tala og legg dei saman: `1 + 1 + 1 + 1 + 1 = 5`.
+
+---
+
+**Samanlikna med ei vanleg for-løkke**
+
+Koden gjer nøyaktig det same som denne tradisjonelle løkka:
+
+```python
+solved = 0
+for row in tickets:
+    if row["is_resolved"] == "yes":
+        solved += 1  # Her er 1-talet det same som 1-talet fremst i generatoruttrykket!
+```
+
+---
+
+**Kvifor skrive det på denne måten?**
+
+- **Kort og konsist:** Du gjer teljinga på éi linje utan å måtte initialisere `solved = 0` først.
+- **Minneeffektivt:** Fordi vi ikkje brukar klammeparentesar (`[` og `]`), lagar ikkje Python ei heil liste i minnet først (slik `[1, 1, 1]` ville gjort). Den sender berre eitt og eitt `1`-tal direkte inn i `sum()` undervegs.
+
+---
+
+**Eit anna vanleg triks (kjekt å vite)**
+
+Sidan `True` i Python har verdien `1` og `False` har verdien `0` ved numeriske operasjonar, ser ein ofte også dette skrive slik:
+
+```python
+solved = sum(row["is_resolved"] == "yes" for row in tickets)
+```
+Her blir kvar `True` rekna som `1`, og `False` som `0`. Begge måtane gir nøyaktig same resultat!
 
 
 
