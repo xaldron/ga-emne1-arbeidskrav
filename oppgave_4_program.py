@@ -42,6 +42,16 @@ with open(report_path, "w", encoding="utf-8") as file:
         file.write(f"  * Henvendelse med ID nummer {i}: Antall minutter brukt: {m} \n")
     file.write("\n------------------------------------\n")
 
+# Oppgave 4.4
+
+print("\n")
+print("Resultat av oppgave 4.4: ")
+try:
+    result = sum_resolved_minutes(valid_tickets)
+    print(f"- Totalt løste minutt: {result}")
+except FileNotFoundError:
+    print("Feil: Fant ikke CSV-fila for supporthenvendelser.")
+
 
 
 

@@ -76,3 +76,16 @@ def most_tickets(categories):
 def unsolved_tickets_sorted(tickets):
     unsolved_tickets = [(row["minutes"], row["id"]) for row in tickets if row["is_resolved"] == "no"]
     return sorted(unsolved_tickets, reverse=True)
+
+
+# Oppgave 4.4
+def sum_resolved_minutes(requests: list[dict[str, str | int]] > int):
+    total = 0
+    for request in requests:
+        if request["is_resolved"] == "yes":
+            try:
+                total += int(request["minutes"])
+            except (ValueError, TypeError):
+                print("Wops. Her ser det ut til eksisterer en ugyldig eller ikke eksisterende verdi!")
+                continue
+    return total

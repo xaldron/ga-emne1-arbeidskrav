@@ -1022,7 +1022,29 @@ ettersom de da var svært lesbare. Her burde jeg bedt KI-en om ikke å komme med
 Unntakene er most_tickets og unsolved_tickets_sorted som jeg har skrivd selv.
 
 
+Forklaring på rettingar i oppgåve 4.4:
+Retting 1: Den første åpenbare rettinga for meg er å lukke parantesen for der ein sett inn argument. 
+Argumentet i seg sjølv framstår merkeleg, og dette endrer eg berre til "requests" fram til eg skjønar litt betre kva som er tanken.
+Retting 2: Endrar argumentet tilbake til opphaveleg. KI lærar meg at dette er typehints(nytt omgrep for meg, men forståeleg nok då KI bryt det ned for meg), som fortel kva det er forventa at parameteren skal innehalde. 
+Retting 3: Oppdager at jeg tendenserer mot nynorsk også her i readme og "retter" meg selv tilbake til bokmål. 
+Retting 4: Ser ut til at Python ikke liker "->" og gir syntax-feil. Endrer til bare ">" og ser da ut til å fungere som det skal.
+Retting 5: Endrer variabelnavnet i return til å være likt som det lokale variabelnavnet "total".
+Retting 6: Endrer "=" i if statement til bools "=="
+Retting 7: Regner med at innholdet i variabelen "total" ikke bare skal erstattes ved hvert treff, og endrer dette til "+=" for løpende oppdatering av data.
+Retting 8: I forlengelse av retting nr. 7 caster jeg request["minutes"] i samme kodelinje til int. 
+Kommentar til retting 8: Dette fungerer bra når jeg bruker min egen "get_valid_tickets" funksjon som parameter, fordi den allerede luker bort ugyldige minutes verdier som "thirty". 
+Ellers kunne det vært hensiktsmessig å legge til "and request["minutes"].isdigit()" for at funksjonen ikke skal kræsje når den kommer til "thirty"
 
+Det ser ut til at funksjonen nå fungerer når jeg passerer min egen funksjon "get_valid_tickets" som parameter. Returnert verdi blir 44. Går over til try/except delen av oppgaven. 
+
+Obs: Kommentar til kommentar for retting 8. Ser av oppgaven (med KI-hjelp) at jeg skal bruke mårettet try/except for konvertering, og vil tro det "konvertering" er norsk for casting. Altså at det går inn under her. 
+
+Retting 9: Legger til try/except for if statement i funksjonen. 
+
+Til slutt: Legger til funksjonen som en egen del av programmet helt til slutt. Skriver ikke til support-rapport.txt da oppgaven ikke ber meg om dette. 
+Printer resultatet direkte i konsollen i stedefor, men med try/except for filfeil rundt kjøring av funksjonen. 
+
+KI-prompts- og svar:
 **prompt 1:** 
 
 Korleis korter eg ned snitttida ned til ein desimal, slik eg prøver på her? 
@@ -1294,9 +1316,150 @@ Du står heilt fritt til korleis du vil designe overskriftene, så lenge:
 - Du legg på linjeskift (`\n`) slik at overskrifta kjem på si eiga linje.
 - Det kjem tydeleg fram kva overskrift som høyrer til kva analyseresultat.
 
+**prompt 3:**
+"Litt meir konkret: Korleis gjer eg det? Skal eg endre except for kvar gong eg prøver å køyre funksjonen? Kvar skal try/except vere? Skal eg køyre funksjonen i try? "
 
+**svar:**
+For å oppnå maksimal stabilitet og minst mogleg vedlikehaldsarbeid, er målet med unntakshandtering (`try/except`) å gjere programmet sjølvgåande. Det skal takle uventa data og feilsituasjonar automatisk utan at koden må endrast manuelt mellom kvar køyring.
 
+---
 
+**1. Skal du endre `except` for kvar gong du prøver å køyre?**
+
+**Nei.** Du treng aldri å endre `except` for kvar køyring. 
+
+I staden definerer du dei moglege unntaka éin gong. Python lèt deg handtere fleire spesifikke feiltypar i same `try`-blokk, eller plassere målretta `try/except`-blokker nøyaktig der risikoen for feil oppstår. Dermed oppnår programmet full beredskap for alle definerte feilscenario samtidig.
+
+---
+
+**2. Kvar skal `try/except` plasserast?**
+
+For å minimere konsekvensane av feil bør unntakshandtering plasserast så **tett på den risikofylte operasjonen** som mogleg. Då isolerer du feilen slik at resten av programmet kan halde fram med å levere verdi.
+
+I oppgåve 4.4 er det særleg to risikoområde:
+
+**A. Konverteringsfeil (inne i funksjonen / løkka)**
+Inne i `sum_resolved_minutes()` skal verdien frå `request["minutes"]` konverterast til eit heiltal (`int`). Dersom ein verdi inneheld ugyldig tekst (t.d. `"ti"` eller `""`), vil `int()` kaste eit `ValueError`.
+
+Ved å leggje `try/except` rundt sjølve konverteringa inni løkka:
+- Fangar du opp rader med korrupt data.
+- Sørgjer du for at løkka ikkje krasjar heile rekneskapen, men kan hoppe over raden eller handtere feilen.
+
+**Prinsippskisse:**
+```python
+for request in requests:
+    if request["is_resolved"] == "yes":
+        try:
+            total += int(request["minutes"])
+        except (ValueError, TypeError):
+            # Handterer at verdien ikkje let seg gjere om til heiltal
+            continue
+```
+
+---
+
+**B. Filfeil (der fila vert opna og lesen)**
+Operasjonar som opnar filer (`open(...)`) ber alltid ein risiko for at fila er flytta, har feil namn eller manglar lesetilgang (`FileNotFoundError` eller `OSError`).
+
+Ved å pakke inn filopninga og innhentinga av data der du kallar funksjonen, sikrar du at programmet gjev ei forståeleg melding i staden for ein brå krasj:
+
+**Prinsippskisse:**
+```python
+try:
+    tickets = get_valid_tickets()
+    resultat = sum_resolved_minutes(tickets)
+    print(f"Totalt løyste minutt: {resultat}")
+except FileNotFoundError:
+    print("Feil: Fann ikkje CSV-fila for supporthenvendelser.")
+```
+
+---
+
+**3. Kan ein ha fleire `except` på same `try`?**
+
+Ja. Dersom éi blokk med kode kan utløyse fleire ulike feil, set du berre opp fleire `except`-ledd under kvarandre:
+
+```python
+try:
+    # Kode som både opnar fil og gjer utrekningar
+    ...
+except FileNotFoundError:
+    # Slår berre inn dersom fila manglar
+    ...
+except ValueError:
+    # Slår berre inn dersom ein tallkonvertering feilar
+    ...
+```
+
+---
+
+**Samandrag**
+
+| Spørsmål | Optimal løysing | Nytteverdi |
+| :--- | :--- | :--- |
+| **Endre `except` kvar gong?** | Nei, definer dei spesifikke unntaka permanent. | Koden vert sjølvdriven og krev null manuell justering. |
+| **Kvar handtere konvertering?** | Tett på `int()` inni løkka (`except ValueError`). | Hindrar at éin ugyldig rad veltar heile utrekninga. |
+| **Kvar handtere filfeil?** | Rundt `open()` eller datainnhentinga (`except FileNotFoundError`). | Gjev kontrollert tilbakemelding dersom fila manglar. |
+
+**prompt 4:**
+""requests: list[dict[str, str | int]]) -> int"
+
+Er dette berre eit tulleargument, eller kan argument  i ein funksjon sjå slik ut? Har aldri sett noko liknande"
+
+**svar:**
+Nei, dette er **absolutt ikkje eit tulleargument!** Dette er ein heilt reell og moderne måte å skrive funksjonar på i Python, og det vert kalla **type hints** (eller *type annotations*).
+
+---
+
+**Kva er type hints?**
+
+I eldre/enklare Python skriv ein ofte berre:
+```python
+def sum_resolved_minutes(requests):
+    ...
+```
+Her veit ein ikkje kva `requests` eigentleg er før ein les koden inni funksjonen. 
+
+Med **type hints** fortel ein både andre programmerarar, editoren (som PyCharm) og analyseverktøy kva slags datatypar funksjonen forventar å ta imot, og kva han returnerer.
+
+---
+
+**Nedbryting av uttrykket del for del**
+
+Når du ser:
+```python
+def sum_resolved_minutes(requests: list[dict[str, str | int]]) -> int:
+```
+
+betyr dei ulike delane følgjande:
+
+**1. `requests:`**
+- Dette er sjølve **parameternamnet** (variabelen). Alt som kjem etter kolon (`:`) er berre ei skildring av kva datatype variabelen skal ha.
+
+**2. `list[...]`**
+- Fortel at `requests` skal vere ei **liste** (`list`).
+
+**3. `dict[str, str | int]`**
+- Fortel kva kvart element i lista skal vere: ei **ordbok** (`dict`).
+- `str`: Nøklane (`keys`) i ordboka er strengar (t.d. `"is_resolved"`, `"minutes"`).
+- `str | int`: Verdiane (`values`) i ordboka kan vere **enten** ein streng (`str`) **eller** eit heiltal (`int`) – lodrett strek (`|`) tyder «eller» (*Union*).
+
+**4. `-> int:`**
+- Pila etter parentesen fortel kva funksjonen skal **returnere** – her eit heiltal (`int`), altså det totale talet på minutt.
+
+---
+
+**Kva gjer dette i praksis?**
+
+- **Python bryr seg ikkje ved køyring:** Python er framleis eit dynamisk språk. Dersom du sender inn noko anna, vil ikkje Python automatisk krasje berre på grunn av typedefinisjonen, men koden inni kan feile.
+- **PyCharm forstår koden betre:** PyCharm kan gje deg betre autofullføring og åtvare deg med gule strekar dersom du prøver å sende inn feil datatype.
+- **Svært nyttig dokumentasjon:** Du slepp å lure på om `requests` er ein streng, ei liste eller eit tal – definisjonen seier det svart på kvitt med ein gong.
+
+---
+
+**Oppsummering**
+
+Når du skal løyse oppgåva, kan du anten la type-hintinga stå slik ho er, eller fjerne ho til `def sum_resolved_minutes(requests):` dersom du synest det er enklare å lese. Begge delar er gyldig Python!
 
 
 
