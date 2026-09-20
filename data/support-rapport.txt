@@ -1,0 +1,45 @@
+= RAPPORT FOR SUPPORTHENVENDELSER =
+-----------------------------------
+
+== Antall gyldige henvendelser og antall i hver kategori ==
+
+Det er totalt 15 gyldige henvendelser.
+
+Fordeling per kategori: 
+  * innlogging: 4 henvendelser
+  * programvare: 4 henvendelser
+  * nettverk: 2 henvendelser
+  * utstyr: 5 henvendelser
+
+-------------------------------------
+
+== Samlet og gjennomsnittlig tidsbruk ==
+
+Samlet tidsbruk for henvendelsene er: 466 minutter.
+Gjennomsnittlig tidsbruk per henvendelsene er: 31.1 minutter.
+
+----------------------------------
+
+ == Antall løste og uløste henvendelser ==
+
+ Antall løste henvendelser: 9
+ Antall uløste henvendelser: 6
+---------------------------------
+
+== Kategorien med flest henvendelser ==
+
+ Kategori 'utstyr' har 5 henvendelser og er dermed kategorien med flest henvendelser.
+
+------------------------------------
+
+ == Uløste henvendelser per mest tidkrevende == 
+
+Fordeling per id og tidsbruk: 
+  * Henvendelse med ID nummer 13: Antall minutter brukt: 63 
+  * Henvendelse med ID nummer 4: Antall minutter brukt: 55 
+  * Henvendelse med ID nummer 10: Antall minutter brukt: 48 
+  * Henvendelse med ID nummer 2: Antall minutter brukt: 42 
+  * Henvendelse med ID nummer 17: Antall minutter brukt: 39 
+  * Henvendelse med ID nummer 7: Antall minutter brukt: 35 
+
+------------------------------------
