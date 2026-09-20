@@ -22,6 +22,7 @@ def read_check():
                 print(f"Problem på rad: Ugyldig status på om henvendelsen er løst. Raden tas ikke med i rapporten.")
             else:
                 print(row)
+    print()
     print("Skriver rapport med utvalgte resultater...\nSe egen fil 'support-rapport.txt'")
 
 
@@ -70,8 +71,7 @@ def tickets_solved_unsolved(tickets):
 
 
 def most_tickets(categories):
-    return max(categories.items())
-
+    return categories.most_common(1)[0]
 
 def unsolved_tickets_sorted(tickets):
     unsolved_tickets = [(row["minutes"], row["id"]) for row in tickets if row["is_resolved"] == "no"]

@@ -1231,9 +1231,68 @@ solved = sum(row["is_resolved"] == "yes" for row in tickets)
 ```
 Her blir kvar `True` rekna som `1`, og `False` som `0`. Begge måtane gir nøyaktig same resultat!
 
+**prompt 3**:
+Jeg skal nå, med funksjonene tidligere i oppgaven, skrive en rapport til tekstfil. Ikke svar på hvordan jeg gjør dette, svar kun på følgende spørsmål: Oppgaven sier "og skrive de beregnede
+analyseresultatene til filen med tydelige overskrifter." Hvordan skriver jeg tydelige overskrifter? Jeg fant en kilde på nett som sa bruk av likhetstegn mellom overskriftene, men det så ikke helt riktig ut ;P 
 
+**svar:**
+I ei vanleg rein tekstfil (`.txt`) finst det ikkje formatering som **fet skrift**, *kursiv* eller skriftstorleikar. «Tydelige overskrifter» i ei tekstfil betyr difor rett og slett at du gjer overskriftene visuelt synlege og lettlesne ved hjelp av vanlege teikn, mellomrom og linjeskift.
 
+---
 
+**Kvifor likheitsteikna såg feil ut**
+
+I Python må alle slike visuelle teikn liggje **inni** sjølve tekststrengen (innanfor hermeteikna `"` eller `'`). Slik du hadde skrive det:
+```python
+file.write(= "Rapport" =)  # Dette gir SyntaxError i Python
+```
+vil Python tolke `=` som ein operator utanfor strengen. For at det skal vere gyldig Python, må teikna stå inni strengen:
+
+```python
+file.write("=== RAPPORT ===\n")
+```
+
+---
+
+**Vanlege måtar å lage tydelege overskrifter i tekstfiler**
+
+Her er nokre vanlege og ryddige måtar å formatere overskrifter og seksjonar på i reine tekstfiler:
+
+**1. Understreking med teikn (svært vanleg og ryddig)**
+Du skriv overskrifta på éi linje og ei linje med bindestrekar (`-`) eller likheitsteikn (`=`) rett under:
+
+```text
+RAPPORT FOR SUPPORTHENVENDELSER
+===============================
+
+Samla tidsbruk: 120 minutt
+Gjennomsnittleg tidsbruk: 15.5 minutt
+
+KATEGORIOVERSIKT
+----------------
+Maskinvare: 5
+Nettverk: 3
+```
+
+**2. Innramming eller linjer**
+Bruke skiljeteikn før og etter tittelen:
+
+```text
+=== HOVUDOVERSKRIFT ===
+
+--- Delresultat 1 ---
+```
+
+**3. Bruk av linjeskift og luft (`\n`)**
+Det viktigaste for å gjere overskrifter og innhald tydeleg i ei tekstfil er å leggje til nok linjeskift (`\n`) mellom seksjonane, slik at resultata ikkje blir ein stor, samantrykt tekstblokk.
+
+---
+
+**Kort oppsummering**
+Du står heilt fritt til korleis du vil designe overskriftene, så lenge:
+- Teikna (`=`, `-`, `*` osv.) står **innanfor hermeteikna** i strengen.
+- Du legg på linjeskift (`\n`) slik at overskrifta kjem på si eiga linje.
+- Det kjem tydeleg fram kva overskrift som høyrer til kva analyseresultat.
 
 
 
