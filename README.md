@@ -67,8 +67,12 @@ Kva betyr denne feilmeldinga?
 > ```python
 > for k, v in dicts:
 > ```
-> **Kvifor skjer dette?** Når du itererer over ei ordbok (dictionary) direkte i Python med `for ... in dicts:`, itererer Python berre over nøklane (keys), ikkje både nøklar og verdiar. Nøklane i ordbøkene dine er strenger som `"topic"`, `"duration_minutes"` og `"status"`. Når du skriv `for k, v in dicts:`, prøver Python å pakke ut kvar enkelt nøkkelstreng inn i to variablar (`k` og `v`). Sidan strengen `"topic"` har 5 teikn, har strengen fleire enn dei 2 verdiane Python forventar – derav feilmeldinga.
->
+> 
+> **Kvifor skjer dette?**
+> Når du itererer over ei ordbok (dictionary) direkte i Python med `for ... in dicts:`, itererer Python berre over nøklane (keys), ikkje både nøklar og verdiar. Nøklane i ordbøkene dine er strenger som `"topic"`, `"duration_minutes"` og `"status"`. 
+> 
+> Når du skriv `for k, v in dicts:`, prøver Python å pakke ut kvar enkelt nøkkelstreng inn i to variablar (`k` og `v`). Sidan strengen `"topic"` har 5 teikn, har strengen fleire enn dei 2 verdiane Python forventar – derav feilmeldinga.
+> 
 > **Korleis fikse det?**
 > For å iterere over både nøklar og verdiar i ei ordbok, må du bruke metoden `.items()`:
 > ```python
@@ -101,7 +105,7 @@ display_completed()
 
 **Svar:**
 > **Kvifor koden ikkje fungerer:**
-> 1. **Bruk av `dicts.items()` i ei indre løkke:** Variabelen `dicts` er allereie ei ordbok frå lista `study_sessions`. Når du gjer `for k in dicts.items():`, blir `k` eit tuppel med eit nøkkel-verdi-par (t.d. `('topic', 'Operators')`). Når du deretter prøver `k["status"]`, får du ein `TypeError` (tuple indices must be integers or slices, not str).
+> 1. **Bruk av `dicts.items()` i ei indre løkke:** Variabelen `dicts` er allereie ei ordbok frå lista `study_sessions`. Når du gjer `for k in dicts.items():`, blir `k` eit tuppel med eit nøkkel-verdi-par (t.d. `('topic', 'Operators')`). Når du deretter prøver `k["status"]`, får du ein `TypeError` (*tuple indices must be integers or slices, not str*).
 > 2. **Statusverdien:** I `study_sessions` er statusen sett til `"completed"`, medan du i if-vilkåret sjekkar mot `"complete"`.
 >
 > **Korleis løyse det:**
@@ -141,16 +145,16 @@ UnboundLocalError: cannot access local variable 'study_sessions' where it is not
 ```
 
 **Svar:**
-> **Kvifor oppstår feilen?** Linje 151 inneheld `study_sessions = sort_duration()`. Når ein variabel blir tilordna med `=` ein stad inne i ein funksjon, reknar Python den automatisk som ein lokal variabel for heile funksjonen.
-> - **Løysing 1:** Bruke `global study_sessions`.
-> - **Løysing 2:** Sortere lista på staden med `.sort()`.
+> **Kvifor oppstår feilen?** Linje 151 inneheld `study_sessions = sort_duration()`. Når ein variabel blir tilordna med `=` ein stad inne i ein funksjon, reknar Python den automatisk som ein lokal variabel for heile funksjonen. Sidan du refererer til `study_sessions.append(...)` *før* denne linja blir nådd, veit ikkje Python kva lokal verdi den skal referere til.
+> - **Løysing 1:** Bruke `global study_sessions` øvst i funksjonen.
+> - **Løysing 2:** Sortere lista på staden med `.sort()` i staden for ny tilordning.
 
 **Oppfølgingsprompt:**
 > *«Eg fann ei bedre løysing, som var å gje `choose_program` eit argument, og deretter bytta ut variabelen `study_session` med `dict_list`, for så endre elif statement til det samme og putte `study_session` som argument når eg køyrer `choose_program`»*
 
 **Svar:**
 > **God tilnærming med argument og parametrar!** Å sende inn lista som eit argument (`dict_list`) til funksjonar er god programmeringspraksis som gjer koden modulær og uavhengig av globale variablar.
-> - Pass på at også `display_completed()`, `search_topic()` og `display_duration_completed()` oppdaterast til å ta imot `dict_list`.
+> - Pass på at også dei andre funksjonane (`display_completed()`, `search_topic()` og `display_duration_completed()`) oppdaterast til å ta imot `dict_list`.
 </details>
 
 ---
@@ -192,9 +196,45 @@ Den offisielle `datetime`-modulen fremsto som det opplagte valget. Jeg har hørt
 > *(Viser til `date.strptime(date_string, format)` i docs)*
 
 **Svar:**
-> Ja – du bruker `input()` først, og så prøver du å tolke teksten med `datetime.strptime(tekst, "%d.%m.%Y")`:
-> - `%d` = to-sifret dag, `%m` = to-sifret måned, `%Y` = fire-sifret år.
-> - Dersom teksten ikke matcher eller er ugyldig (f.eks. `31.02.2026`), kastes en `ValueError` som fanges opp i `try/except`.
+> Ja — nesten, og du er inne på akkurat rett spor. Det er ein viktig liten nyanse.
+>
+> `date.strptime()` gjer ikkje sjølv input-funksjonen. Du kan først få inn tekst med `input()`, og så prøve å tolke teksten som ein dato:
+>
+> ```python
+> tekst = input("Skriv inn dato (dd.mm.åååå): ")
+> dato = date.strptime(tekst, "%d.%m.%Y")
+> ```
+>
+> Her betyr:
+> - `"%d"` → dag med to siffer
+> - `"%m"` → månad med to siffer
+> - `"%Y"` → år med fire siffer
+>
+> Så dersom brukaren skriv:
+> `15.09.2026`
+> blir dato ein faktisk `date`-verdi.
+>
+> Men dersom brukaren skriv noko som ikkje kan tolkast etter formatet, vil Python normalt gi:
+> `ValueError`
+>
+> For eksempel:
+> `15-09-2026`
+> eller:
+> `15.9.2026`
+> kan føre til `ValueError` fordi teksten ikkje passar formatet du oppgav.
+>
+> Og dette er sannsynlegvis sjølve poenget med oppgåva: Du skal lage ein funksjon som prøver dette, og handtere situasjonen der brukaren skriv noko ugyldig.
+>
+> Dokumentasjonen seier altså i praksis:
+> *«Prøv å tolke denne teksten som ein dato etter dette mønsteret. Klarer eg det ikkje, kastar eg ValueError.»*
+>
+> Det fine er at dokumentasjonen faktisk fortel deg akkurat kva verktøy du treng. Du treng ikkje finne opp ein masse manuell kontroll av om teikn 3 er ".", om teikn 6 er ".", om månaden er mellom 1 og 12 osv. 😄
+>
+> Og ein liten ting å vere obs på: `strptime()` kan òg avsløre semantisk ugyldige datoar, ikkje berre feil skiljeteikn. `31.02.2026` er til dømes ikkje ein gyldig dato og vil derfor også utløyse `ValueError`.
+>
+> Så eg ville lese oppgåveteksten som:
+> tekst → prøv `strptime()` → gyldig? returner `date` → ugyldig? handter `ValueError`.
+>
 </details>
 
 <details>
@@ -294,54 +334,226 @@ Her er en oversikt over feilene funnet i den opprinnelige koden og hvordan de bl
 ### Dokumentasjon av KI-bruk (Oppgave 4)
 
 <details>
-<summary><b>1) Avrunding og formatering av snittid</b></summary>
+<summary><b>1) Avrunding, formatering og tuple return i ticket_time_spent()</b></summary>
 
 **Prompt:**
 > *«Korleis korter eg ned snitttida ned til ein desimal, slik eg prøver på her?»*
 
 **Svar:**
-> Syntaksen `total_minutes/counter:.1f` gir `SyntaxError` utenfor f-strings.
-> - For tallverdier til videre beregninger: Bruk `round(total_minutes / counter, 1)`.
-> - For strengvisning: Bruk `f"{total_minutes / counter:.1f}"`.
-</details>
+> Syntaksen `total_minutes/counter:.1f` fører til ein `SyntaxError` fordi formatspesifikasjonen `:.1f` berre er gyldig inni formaterte strengar (f-strings), og ikkje direkte i numeriske uttrykk eller tuplar.
+>
+> **1. Avrunding som tal (`float`) – Best for vidare utrekningar:**
+> ```python
+> avg_minutes = round(total_minutes / counter, 1)
+> return (total_minutes, avg_minutes)
+> ```
+>
+> **2. Formatering som streng (`str`) – Best for visning:**
+> ```python
+> avg_minutes = f"{total_minutes / counter:.1f}"
+> return (total_minutes, avg_minutes)
+> ```
+>
+> **Optimalisert funksjon med feilhandtering mot divisjon med null:**
+> ```python
+> def ticket_time_spent():
+>     with open(file_path, "r", encoding="utf-8") as file:
+>         content = csv.DictReader(file)
+>         total_minutes = 0
+>         counter = 0
+>         for row in content:
+>             if "" in row.values():
+>                 continue
+>             elif int(row['id']) < 1:
+>                 continue
+>             elif not row['minutes'].isdigit() or int(row['minutes']) < 0:
+>                 continue
+>             elif row['is_resolved'] != "yes" and row['is_resolved'] != "no":
+>                 continue
+>             else:
+>                 counter += 1
+>                 total_minutes += int(row['minutes'])
+>         
+>         if counter == 0:
+>             return (0, 0.0)
+>             
+>         return (total_minutes, round(total_minutes / counter, 1))
+> ```
 
-<details>
-<summary><b>2) Refaktorering til felles get_valid_tickets()-funksjon</b></summary>
-
-**Prompt:**
-> *«Er det slik at eg burde/kunne ha laga ein funksjon/brukt valid_ticket_count som returnerer kun dei gyldige radene i fila, og deretter bruk denne funksjonen som parameter/argument i dei andre?»*
+**Oppfølgingsprompt:**
+> *«Oppgåva ba meg om "samlet og gjennomsnittlig tidsbruk, med gjennomsnitt til én desimal", har eg tenkt rett i å returnere dei to verdiane i ein tuple, siden det ikkje går an å returnere enkeltverdiar fleira gonger? Tanken er tuple unpacking seinere i koden når verdiane skal nyttast/visast»*
 
 **Svar:**
-> Ja, dette følger **DRY** (*Don't Repeat Yourself*) og **Single Responsibility Principle**. CSV-filen leses én gang via `get_valid_tickets()`, og listen sendes inn til analysefunksjonene (`ticket_per_category`, `ticket_time_spent`, `tickets_solved_unsolved`).
-
-**Subprompt (Forklaring på generatoruttrykk):**
-> *«Kan du bryte ned `solved = sum(1 for row in tickets if row["is_resolved"] == "yes")`? Hva representerer 1-tallet?»*
->
-> *Forklaring:* For hver rad som matcher `if`-kravet produseres tallet `1`, og `sum()` legger sammen alle 1-tallene. Dette tilsvarer `solved += 1` i en vanlig for-løkke, men er mer konsist og minneeffektivt.
+> Ja, du har **heilt rett!** Å returnere fleire verdiar samla i ein **tuple** og deretter bruke **tuple unpacking** er den standard og mest vanlege måten å sende og ta imot fleire verdiar frå ein funksjon på i Python:
+> ```python
+> total, avg = ticket_time_spent(valid_tickets)
+> ```
 </details>
 
 <details>
-<summary><b>3) Formatering av rapport til tekstfil</b></summary>
+<summary><b>2) Refaktorering til felles get_valid_tickets() og analysefunksjoner</b></summary>
 
 **Prompt:**
-> *«Oppgaven sier 'og skrive de beregnede analyseresultatene til filen med tydelige overskrifter.' Hvordan skriver jeg tydelige overskrifter i en tekstfil?»*
+> *«hmmm, er det slik at eg burde/kunne ha laga ein funksjon/brukt valid_ticket_count som returnerer kun dei gyldige radene i fila, og deretter bruk denne funksjonen som parameter/argument i dei andre ( i staden for samme ifs og elifs i kvar funksjon)? Eller er det greit slik det står no?»*
 
 **Svar:**
-> I rene `.txt`-filer lages overskrifter ved hjelp av linjeskift (`\n`), understreking med tegn (`===` eller `---`) og luft mellom seksjoner. Alle tegn må ligge inni tekststrengene i `file.write()`.
+> Ja, det er ein **svært god idé!** Dette følger **DRY-prinsippet** (*Don't Repeat Yourself*) og **Single Responsibility Principle**.
+>
+> **1. Ein funksjon som hentar og returnerer gyldige saker:**
+> ```python
+> def get_valid_tickets():
+>     valid_rows = []
+>     with open(file_path, "r", encoding="utf-8") as file:
+>         content = csv.DictReader(file)
+>         for row in content:
+>             if "" in row.values():
+>                 continue
+>             elif int(row['id']) < 1:
+>                 continue
+>             elif not row['minutes'].isdigit() or int(row['minutes']) < 0:
+>                 continue
+>             elif row['is_resolved'] not in ("yes", "no"):
+>                 continue
+>             else:
+>                 valid_rows.append(row)
+>     return valid_rows
+> ```
+>
+> **2. Sende dei gyldige radene inn som argument til dei andre funksjonane:**
+> ```python
+> def ticket_per_category(tickets):
+>     categories = [row["category"] for row in tickets]
+>     return Counter(categories)
+>
+> def ticket_time_spent(tickets):
+>     if not tickets:
+>         return (0, 0.0)
+>     total_minutes = sum(int(row["minutes"]) for row in tickets)
+>     avg_minutes = round(total_minutes / len(tickets), 1)
+>     return total_minutes, avg_minutes
+>
+> def tickets_solved_unsolved(tickets):
+>     solved = sum(1 for row in tickets if row["is_resolved"] == "yes")
+>     unsolved = len(tickets) - solved
+>     return solved, unsolved
+> ```
+>
+> **3. Køyring:**
+> ```python
+> valid_tickets = get_valid_tickets()
+> print(f"Tal på gyldige saker: {len(valid_tickets)}")
+> print(f"Tidsbruk: {ticket_time_spent(valid_tickets)}")
+> print(f"Kategoriar: {ticket_per_category(valid_tickets)}")
+> print(f"Løyst / uløyst: {tickets_solved_unsolved(valid_tickets)}")
+> ```
+
+**Oppfølgingsprompt:**
+> *«kan du bryte ned denne for meg som du skrev? Skjønner for eksmepel ikke helt hva 1 representerer. Er det litt det samme som += 1 om det hadde vært i en løkke? `solved = sum(1 for row in tickets if row["is_resolved"] == "yes")`»*
+
+**Svar:**
+> Ja, du har **heilt rett!** Det er i praksis nøyaktig det same som å gjere `solved += 1` inni ei vanleg for-løkke.
+> - `for row in tickets`: Går gjennom kvar henvendelse i lista `tickets`.
+> - `if row["is_resolved"] == "yes"`: Sjekkar om henvendelsen er markert som løyst.
+> - `1`: For kvar rad som oppfyller kravet, genererer uttrykket talet `1`.
+> - `sum(...)`: Tek imot alle `1`-tala og legg dei saman.
+>
+> Tilsvarande tradisjonell løkke:
+> ```python
+> solved = 0
+> for row in tickets:
+>     if row["is_resolved"] == "yes":
+>         solved += 1
+> ```
 </details>
 
 <details>
-<summary><b>4) Målrettet try/except og type hints</b></summary>
+<summary><b>3) Rapportskriving til tekstfil, overskrifter og Counter.most_common()</b></summary>
 
-**Prompt 1 (Unntakshåndtering):**
-> *«Kvar skal try/except vere? Kva meiner dei med målretta try/except?»*
->
-> *Forklaring:* Unntakshåndtering plasseres tett på den risikofylte operasjonen. Bruk `except ValueError:` ved konvertering av `int(request["minutes"])` inne i funksjonen, og `except FileNotFoundError:` rundt filinnlesingen.
+**Prompt 1 (Overskrifter og formatering i .txt):**
+> *«Oppgaven sier "og skrive de beregnede analyseresultatene til filen med tydelige overskrifter." Hvordan skriver jeg tydelige overskrifter? Jeg fant en kilde på nett som sa bruk av likhetstegn mellom overskriftene, men det så ikke helt riktig ut ;P»*
+
+**Svar:**
+> I ei tekstfil må teikna stå inni strengen (t.d. `file.write("=== RAPPORT ===\n")`). Bruk understreking med teikn (`===` eller `---`) og linjeskift (`\n`) for å skape luft mellom seksjonane:
+> ```text
+> RAPPORT FOR SUPPORTHENVENDELSER
+> ===============================
+> 
+> Samla tidsbruk: 120 minutt
+> Gjennomsnittleg tidsbruk: 15.5 minutt
+> ```
+
+**Prompt 2 (Skriving inni éin with open):**
+> *«Er det best å skrive heile rapporten innafor samme with open eg har byrja på, med ny file.write() for kvar gang eg legg noko til?»*
+
+**Svar:**
+> Ja, det er **heilt rett og best praksis** å halde all skrivinga samla inni den eine `with open(..., "w", ...)`-blokka for å unngå at fila blir overskrive eller opna unødvendig fleire gonger.
+
+**Prompt 3 (Utskrift av kategorier og Counter.most_common):**
+> *«Både highest_category og categories er eg ikkje heilt nøgd med at den printer den i dictformat. Korleis kan eg printe ut berre dei relevante verdiane? Altså noko slik som "kategorien med flest henvendelser er "utstyr" med 5 henvendelser" i stadenfor "{utstyr: 5}"?»*
+
+**Svar:**
+> **1. Hente ut toppkategori:**
+> ```python
+> top_category, top_count = highest_category
+> file.write(f"Kategorien med flest henvendelser er '{top_category}' med {top_count} henvendelser.\n")
+> ```
+> 
+> *Viktig om `most_tickets()`:* Standard `max(categories.items())` samanliknar alfabetisk på kategorinamnet. Bruk heller `Counter.most_common(1)[0]`:
+> ```python
+> def most_tickets(categories):
+>     return categories.most_common(1)[0]
+> ```
+> 
+> **2. Skrive ut alle kategoriar med løkke:**
+> ```python
+> for kategori, antall in categories.items():
+>     file.write(f"  - {kategori}: {antall} henvendelser\n")
+> ```
+
+**Prompt 4 (Forklaring på most_common(1)[0]):**
+> *«Kva representerer (1) og [0] her då?»*
+
+**Svar:**
+> - `(1)`: `most_common(1)` returnerer ei liste med det **1** mest vanlege elementet: `[('utstyr', 5)]`.
+> - `[0]`: Hentar ut det første elementet frå lista, slik at du sit att med sjølve tuppelet `('utstyr', 5)`.
+</details>
+
+<details>
+<summary><b>4) Oppgave 4.4: Målrettet try/except og feilretting</b></summary>
+
+**Prompt 1 (Målrettet try/except):**
+> *«Kva meiner dei med å bruke "målrettet" try/except? Kvar skal try/except vere?»*
+
+**Svar:**
+> Med eit «målretta» unntak meiner ein at du eksplisitt oppgir **kva type feil** koden skal fange opp, i staden for ein tom/brei `except:` som skjuler alle feil:
+> 1. **Konverteringsfeil (inne i funksjonen / løkka):** 
+>    `int(request["minutes"])` kan kaste `ValueError` dersom verdien er ugyldig tekst.
+>    ```python
+>    for request in requests:
+>        if request["is_resolved"] == "yes":
+>            try:
+>                total += int(request["minutes"])
+>            except (ValueError, TypeError):
+>                continue
+>    ```
+> 2. **Filfeil (der fila vert opna/henta):** 
+>    Bruk `try/except FileNotFoundError:` rundt filkall i hovudprogrammet.
 
 **Prompt 2 (Type hints):**
-> *«requests: list[dict[str, str | int]]) -> int – Er dette berre eit tulleargument?»*
->
-> *Forklaring:* Dette er standard *type hints* i Python. Det angir at parameteren forventer en liste med ordbøker der nøklene er strenger og verdiene er streng eller tall, og at funksjonen returnerer et heltall (`int`).
+> *«requests: list[dict[str, str | int]]) -> int – Er dette berre eit tulleargument, eller kan argument i ein funksjon sjå slik ut?»*
+
+**Svar:**
+> Nei, dette er **type hints** (typeannonseringar):
+> - `requests:` Variabelnamnet.
+> - `list[dict[str, str | int]]`: Parameteren forventar ei liste (`list`) der kvart element er ei ordbok (`dict`) med streng-nøklar og verdiar av typen streng eller heiltal.
+> - `-> int:` Angir at funksjonen returnerer eit heiltall (`int`).
+
+**Prompt 3 (TypeError i except):**
+> *«Kva er det TypeError skal fange opp då, siden du foreslår den i samme except?»*
+
+**Svar:**
+> - `ValueError` oppstår når typen er streng, men innhaldet ikkje er tal (f.eks. `int("ugyldig")`).
+> - `TypeError` oppstår dersom verdien ikkje er ein streng eller eit tal i det heile, for eksempel `int(None)`.
 </details>
 
 ---
