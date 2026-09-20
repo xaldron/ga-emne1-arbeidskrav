@@ -1016,6 +1016,75 @@ https://www.geeksforgeeks.org/pandas/reading-csv-files-in-python/
 
 
 
+**prompt 1:** 
+
+Korleis korter eg ned snitttida ned til ein desimal, slik eg prøver på her? 
+
+**svar:**
+
+Syntaksen `total_minutes/counter:.1f` fører til ein `SyntaxError` fordi formatspesifikasjonen `:.1f` berre er gyldig inni formaterte strengar (f-strings), og ikkje direkte i numeriske uttrykk eller tuplar.
+
+For å oppnå best mogleg nytteverdi og unngå køyretidsfeil, kjem løysinga an på om resultatet skal nyttast vidare til utrekningar (eit tal) eller berre visast fram (ein tekststreng).
+
+---
+
+**1. Avrunding som tal (`float`) – Best for vidare utrekningar**
+Dersom verdien skal kunne summerast, samanliknast eller handsamast matematisk vidare i programmet, gir funksjonen `round()` størst funksjonell verdi:
+
+```python
+avg_minutes = round(total_minutes / counter, 1)
+return (total_minutes, avg_minutes)
+```
+
+---
+
+**2. Formatering som streng (`str`) – Best for presentasjon og visning**
+Dersom målet utelukkande er pen visning med nøyaktig éin desimal (inkludert trailing nullar som `12.0`), nyttar du ein f-streng:
+
+```python
+avg_minutes = f"{total_minutes / counter:.1f}"
+return (total_minutes, avg_minutes)
+```
+
+---
+
+**Optimalisert funksjon med feilhandtering**
+
+For å maksimere robustheita og sikre at programmet ikkje krasjar dersom det ikkje finst gyldige saker (`ZeroDivisionError`), kan funksjonen strukturerast slik:
+
+```python
+def ticket_time_spent():
+    with open(file_path, "r", encoding="utf-8") as file:
+        content = csv.DictReader(file)
+        total_minutes = 0
+        counter = 0
+        for row in content:
+            if "" in row.values():
+                continue
+            elif int(row['id']) < 1:
+                continue
+            elif not row['minutes'].isdigit() or int(row['minutes']) < 0:
+                continue
+            elif row['is_resolved'] != "yes" and row['is_resolved'] != "no":
+                continue
+            else:
+                counter += 1
+                total_minutes += int(row['minutes'])
+        
+        # Hindrar divisjon med 0 og returnerer optimalt resultat
+        if counter == 0:
+            return (0, 0.0)
+            
+        return (total_minutes, round(total_minutes / counter, 1))
+
+print(ticket_time_spent())
+```
+
+*(Merk også at du kan hente ut verdien direkte med `int(row['minutes'])` i staden for ei indre `for k,v in row.items()`-løkke for å redusere unødvendige iterasjonar og gjere koden meir effektiv).*
+
+
+
+
  
 
 
