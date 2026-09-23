@@ -558,6 +558,265 @@ Her er en oversikt over feilene funnet i den opprinnelige koden og hvordan de bl
 
 ---
 
+## Oppgave 5
+
+Dokumentasjon/kilder brukt: 
+https://docs.python.org/3/library/csv.html
+
+
+
+
+
+
+
+
+### Dokumentasjon av KI-bruk (Oppgave 5)
+
+
+<details>
+<summary><b>Endringsforslag på "add_dict" etter spørsmål om validering</b></summary>
+
+**Prompt 1 (Validere add_dict):**
+> - *"Var det lurt med den add_dict funksjonen?"* 
+
+**Svar:**
+> - * Now I'm opening the main program file to understand its overall structure and key functions, so I can identify where to implement or analyze the core logic needed for the task.
+
+**Vurdering av `add_dict`-funksjonen**
+
+Tanken bak funksjonen er **helt super**, spesielt hvis planen er å bruke `csv.DictWriter` til å lagre aktivitetene til CSV-fil! Det å konvertere et objekt til en `dict` er en veldig vanlig og god måte å klargjøre data for lagring eller eksport på.
+
+Likevel er det tre konkrete ting som kan forbedres for å gjøre koden enda mer ryddig og etter beste praksis for objektorientert programmering (OOP):
+
+---
+
+**1. Gjør det til en metode inne i `Activity`-klassen (Anbefalt)**  
+I objektorientert programmering er det vanlig at objektet selv «vet» hvordan det skal konvertere sine egne data. 
+
+I stedet for en frittstående funksjon `add_dict(activity)`, er det mer ryddig å legge det som en metode inne i `Activity`-klassen, for eksempel `activity.to_dict()`:
+
+```python
+class Activity:
+    def __init__(self, title: str, category: str, date: datetime, estimated_minutes: int, status):
+        self.title = title
+        self.category = category
+        self.date = date
+        self.estimated_minutes = estimated_minutes
+        self.status = status
+
+    def show_info(self):
+        '''Prints out the activity attributes with a f-string format'''
+        print(f"   -- {self.title} --")
+        print(f"* Kategori: {self.category}")
+        print(f"* Dato: {self.date}")
+        print(f"* Estimert varighet i minutter: {self.estimated_minutes}")
+        print(f"* Status: {self.status}")
+
+    def to_dict(self):
+        '''Returns activity attributes as a dictionary'''
+        return {
+            "title": self.title,
+            "category": self.category,
+            "date": self.date,
+            "estimated_minutes": self.estimated_minutes,
+            "status": self.status
+        }
+```
+
+Da kan du i hovedprogrammet enkelt skrive:
+```python
+my_dict = new_activity.to_dict()
+```
+
+---
+
+**2. Navngiving (`to_dict` i stedet for `add_dict`)**  
+Navnet `add_dict` gir inntrykk av at funksjonen *legger til* noe i en liste eller database (som `add`). Siden funksjonen faktisk *konverterer/returnerer* objektet som en dictionary, er navn som `to_dict()` eller `as_dict()` standard og mer selvforklarende.
+
+---
+
+**3. Konsekvente nøkkelnavn (liten `d` på `date`)**  
+I den nåværende koden har `"Date"` stor forbokstav, mens de andre feltene har små forbokstaver:
+```python
+# Nåværende:
+new_dict = {"title": activity.title, "category": activity.category, "Date": activity.date, ...}
+
+# Anbefalt (små bokstaver overalt):
+new_dict = {"title": activity.title, "category": activity.category, "date": activity.date, ...}
+```
+Det er best å bruke konsekvent lowercase på feltnavn, slik at overskriftene i CSV-filen blir ensartede (f.eks. `title,category,date,estimated_minutes,status`).
+
+---
+
+**Oppsummering**
+* **Var idéen lur?** Ja, konseptet er midt i blinken for CSV-skriving.
+* **Beste justering:** Flytt den inn i klassen som metoden `def to_dict(self):`, rett `"Date"` til `"date"`, og kall den med `aktivitet.to_dict()`.*
+
+
+</details>
+
+**Prompt 2:**
+"Kvifor får eg denne typerror-feilmeldinga? Eg prøver å gjere det som offisiell dokumentasjon forklarer, så eg skjøner ikkje kva dette er for noko?"
+
+**Svar:**
+Update to v3419.7.0 failed
+
+Feilmeldinga (`TypeError`) skuldast at metoden `writer.writerow()` manglar eit påkravd argument.
+
+---
+
+**Kva som forårsakar `TypeError`**
+
+I `oppgave_5_helpers.py` har du skrive følgjande i funksjonen `append_to_file`:
+
+```python
+def append_to_file(dict, path):
+    with open(path, "a", encoding="utf-8", newline='') as path:
+        fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+        writer = csv.DictWriter(path, fieldnames=fieldnames)
+        writer.writerow()  # <-- Feilen oppstår her!
+```
+
+Når du brukar `csv.DictWriter`, krev `writer.writerow()` at du sender med **dictionaryen** som inneheld verdiane som skal skrivast inn i raden. 
+
+Når parentesen er tom (`writer.writerow()`), gir Python feilen:  
+`TypeError: DictWriter.writerow() missing 1 required positional argument: 'rowdict'`
+
+---
+
+**Slik løyser du det**
+
+Du må sende med dictionary-objektet som argument til `writer.writerow(...)`:
+
+```python
+def append_to_file(activity_dict, file_path):
+    with open(file_path, "a", encoding="utf-8", newline='') as file:
+        fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writerow(activity_dict)
+```
+
+---
+
+**Nyttige forbetringar i koden**
+
+1. **Variabelnamn overskygger kvarandre (`as file` i staden for `as path`):**
+   I både `oppgave_5_program.py` og `oppgave_5_helpers.py` står det:
+   ```python
+   with open(path, "w", ...) as path:
+   ```
+   Her heiter filstien `path`, men så gir du også sjølve fil-objektet namnet `path`. Bruk heller `as file` eller `as f` for fil-objektet slik at stien og fila ikkje blandast saman. Unngå også å kalle parametere for `dict`, sidan det overskygger Pythons innebygde `dict`-klasse.
+
+2. **Ulik filsti i hovudprogrammet:**
+   I `oppgave_5_program.py` opprettar du headeren i mappa `data/activities.csv` via variabelen `path`:
+   ```python
+   path = data_folder / "activities.csv"
+   ```
+   Men når du kallar `append_to_file`, sender du inn strengen `"activities.csv"`:
+   ```python
+   append_to_file(my_dict, "activities.csv")
+   ```
+   Dette gjer at dataa hamnar i ei ny fil i rotmappa i staden for under `data/`. Send heller med variabelen `path`:
+   ```python
+   append_to_file(my_dict, path)
+   ```
+   
+**Subprompt:**
+Ok, eg har endra det som du påpeiker. Men, eg får fortsatt: 
+"Traceback (most recent call last):
+  File "C:\Users\Studier\PycharmProjects\GA\Emne1\ga-emne1-arbeidskrav\oppgave_5_program.py", line 21, in <module>
+    append_to_file(my_dict, path)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Studier\PycharmProjects\GA\Emne1\ga-emne1-arbeidskrav\oppgave_5_helpers.py", line 49, in append_to_file
+    with open(file_path, "a", encoding="utf-8", newline='') as file:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: expected str, bytes or os.PathLike object, not TextIOWrapper"
+**Svar:**
+**Kva som forårsakar denne feilmeldinga**
+
+Feilen skuldast at variabelen `path` i `oppgave_5_program.py` blir overskriven og omgjort frå ein filsti til eit fil-objekt (`TextIOWrapper`).
+
+---
+
+**Forklaring steg for steg**
+
+1. **Først definerer du stien:**
+   ```python
+   path = data_folder / "activities.csv"  # Her er path eit Path-objekt (en gyldig filsti)
+   ```
+
+2. **Så overskriv du variabelen i `with`:**
+   ```python
+   with open(path, "w", newline='', encoding="utf-8") as path:  # <-- Her overskriv `as path` variabelen!
+       fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+       writer = csv.DictWriter(path, fieldnames=fieldnames)
+       writer.writeheader()
+   ```
+   Når du skriv `as path`, set Python variabelen `path` lik det opna fil-objektet (`TextIOWrapper`). Sjølv etter at `with`-blokka er ferdig, peikar `path` framleis på fil-objektet (som no er lukka), og ikkje på filstien lenger.
+
+3. **Du sender fil-objektet inn i hjelpefunksjonen:**
+   ```python
+   append_to_file(my_dict, path)  # Sender inn TextIOWrapper i staden for filstien
+   ```
+
+4. **Krasjet oppstår i hjelpefunksjonen:**
+   Inne i `oppgave_5_helpers.py` prøver du å opne fila på nytt:
+   ```python
+   with open(file_path, "a", encoding="utf-8", newline='') as file:
+   ```
+   Her forventar `open()` ein streng eller eit `Path`-objekt (ein filsti), men får i staden inn `TextIOWrapper`-objektet du sende med. Då kastar Python feilen:
+   `TypeError: expected str, bytes or os.PathLike object, not TextIOWrapper`
+
+---
+
+**Slik løyser du det**
+
+Endre `as path` til `as file` (eller `as f`) i `oppgave_5_program.py` slik at du ikkje overskriv sti-variabelen `path`:
+
+```python
+with open(path, "w", newline='', encoding="utf-8") as file:
+    fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+    writer = csv.DictWriter(file, fieldnames=fieldnames)
+    writer.writeheader()
+
+append_to_file(my_dict, path)
+```
+
+Når du no kallar `append_to_file(my_dict, path)`, er `path` framleis den opphavlege `Path`-stien til fila.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Dokumentasjon av KI til opprydding og strukturering av README
 
 Til slutt benyttet jeg KI (Junie) til å rydde opp, strukturere og formatere hele denne `README.md`-filen, da den opprinnelig fremsto uoversiktlig med mange råutskrifter og lange samtalelogger. 
@@ -588,3 +847,5 @@ Her er dialogen og forespørselen som ble brukt for å utføre denne oppryddinge
 > - Omstrukturerte `README.md` med rene overskrifter, tabeller og nedtrekkbare bokser.
 > - Alle opprinnelige tekster, refleksjoner, testtilfeller og KI-logger ble bevart.
 </details>
+
+
