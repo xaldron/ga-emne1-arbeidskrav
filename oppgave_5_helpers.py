@@ -1,6 +1,7 @@
 from datetime import datetime
 #Planning to use csv writer to save activities to file
 import csv
+from collections import Counter
 
 # Class
 # --------------------------------------------------------------
@@ -13,6 +14,7 @@ class Activity:
         self.estimated_minutes = estimated_minutes
         self.status = status
 
+
     def __str__(self) -> str:
         return (f"  == {self.title} ==\n"
                 f"* Kategori: {self.category}\n"
@@ -20,13 +22,6 @@ class Activity:
                 f"* Estimert varighet i minutter: {self.estimated_minutes}\n"
                 f"* Status: {self.status}")
 
-    def show_info(self):
-        '''Prints out the activity attributes with a f-string format'''
-        print(f"   == {self.title} ==")
-        print(f"* Kategori: {self.category}")
-        print(f"* Dato: {self.date}")
-        print(f"* Estimert varighet i minutter: {self.estimated_minutes}")
-        print(f"* Status: {self.status}")
 
     def to_dict(self):
         '''Returns activity attributes as a dictionary'''
@@ -92,8 +87,47 @@ def append_to_file(activity_dict, file_path):
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writerow(activity_dict)
     except FileNotFoundError, FileExistsError, PermissionError:
-        print("Error: Looks like the file does not exist, or you do not have permission to write to it.")
+        print("Error: Det ser ut som filen ikke eksisterer, eller at du ikke har tilgang til den.")
 
+def read_file(file_path):
+
+    rows = []
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            content = csv.DictReader(file)
+            for row in content:
+                rows.append(row)
+            return rows
+    except FileNotFoundError, FileExistsError, PermissionError:
+        print("Error: Det ser ut som filen ikke eksisterer, eller at du ikke har tilgang til den..")
+
+def search_title_or_category(activity_list: list) -> None:
+
+    search = input('Søk etter tittel eller kategori: ')
+
+    for row in activity_list:
+        if search.lower() in str(row.values()).lower():
+            print(f"  == {row["title"]} ==\n"
+                f"* Kategori: {row["category"]}\n"
+                f"* Dato: {row["date"]}\n"
+                f"* Estimert varighet i minutter: {row["estimated_minutes"]}\n"
+                f"* Status: {row["status"]}")
+            print()
+        else:
+            continue
+
+def filter_status(activity_list: list, status: str) -> None:
+
+
+    for row in activity_list:
+        if status.lower() == row["status"]:
+            print(f"  == {row["title"]} ==\n"
+                f"* Kategori: {row["category"]}\n"
+                f"* Dato: {row["date"]}\n"
+                f"* Estimert varighet i minutter: {row["estimated_minutes"]}\n"
+                f"* Status: {row["status"]}")
+            print()
 
 
 

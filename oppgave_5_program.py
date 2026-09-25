@@ -1,25 +1,46 @@
 from pathlib import Path
-
-data_folder = Path(__file__).parent / "data"
-path = data_folder / "activities.csv"
-print(path.exists())
-
 from oppgave_5_helpers import *
+import sys
+
+if __name__ == '__main__':
+    try:
+
+        data_folder = Path(__file__).parent / "data"
+        path = data_folder / "activities.csv"
+        print(path.exists())
+
+
+        #with open(path, "w", newline='', encoding="utf-8") as file:
+            #fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+            #writer = csv.DictWriter(file, fieldnames=fieldnames)
+            #writer.writeheader()
+
+        my_list = read_file(path)
+        filter_status(my_list,"completed")
 
 
 
-with open(path, "w", newline='', encoding="utf-8") as file:
-    fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
-    writer = csv.DictWriter(file, fieldnames=fieldnames)
-    writer.writeheader()
-
-my_test = Activity("Testing", "Coding", "23.09.2026", 15, "planned")
-my_dict = my_test.to_dict()
-append_to_file(my_dict, path)
-
-
-print(my_test)
 
 
 
 
+
+
+
+
+
+
+    except Exception as error:
+        print(f"En uventet feil oppstod {error}")
+        sys.exit(1)
+
+
+
+
+
+
+
+'''new_test = register_activity()
+        test_dict = new_test.to_dict()
+        append_to_file(test_dict, path)
+        print(read_file(path))'''
