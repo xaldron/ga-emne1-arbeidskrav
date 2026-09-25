@@ -785,6 +785,265 @@ append_to_file(my_dict, path)
 Når du no kallar `append_to_file(my_dict, path)`, er `path` framleis den opphavlege `Path`-stien til fila.
 
 
+**prompt med subprompts**
+`return sorted(activity_list, key=itemgetter(int("estimated_minutes")))`
+
+Kvifor fungerer ikkje dette? 
+
+**svar med subprompts**
+**Hvorfor koden feiler**
+
+Det er to hovedgrunner til at linjen `return sorted(activity_list, key=itemgetter(int("estimated_minutes")))` ikke fungerer:
+
+---
+
+**1. `int("estimated_minutes")` kaster en `ValueError`**
+Når Python leser uttrykket, kjøres `int("estimated_minutes")` med en gang.   
+Her forsøker `int()` å konvertere selve tekststrengen `"estimated_minutes"` (altså bokstavene i ordet) til et heltall. Siden ordet ikke består av siffer, krasjer programmet umiddelbart med en feilmelding:  
+`ValueError: invalid literal for int() with base 10: 'estimated_minutes'`
+
+---
+
+**2. `itemgetter` kan ikke transformere data underveis**
+`itemgetter("estimated_minutes")` fungerer som en snarvei for å hente ut verdien til en nøkkel, tilsvarende `ordbok["estimated_minutes"]`.   
+Den kan derimot **ikke** kjøre funksjoner (som `int()`) på verdien den henter ut. Siden verdiene fra CSV-filen er tekststrenger (`"90"`, `"30"`, `"120"`), ville en ren `itemgetter` sortert tallene alfabetisk som tekst i stedet for numerisk.
+
+---
+
+**Hvordan løse det**
+
+For å gjøre om verdien til et heltall før `sorted()` sammenligner elementene, må du hente ut verdien fra ordboken først, og deretter kalle `int()` på den hentede verdien.
+
+Dette kan gjøres på to måter:
+
+**Alternativ A: Med en `lambda`-funksjon**
+En `lambda` tar inn hver ordbok (`x`), slår opp nøkkelen `"estimated_minutes"`, og gjør verdien om til `int`:
+```python
+def filter_duration(activity_list: list):
+    return sorted(activity_list, key=lambda x: int(x["estimated_minutes"]))
+```
+
+**Alternativ B: Med en vanlig hjelpefunksjon (`def`)**
+Hvis du foretrekker vanlige funksjoner fremfor `lambda`:
+```python
+def get_duration_as_int(activity: dict) -> int:
+    return int(activity["estimated_minutes"])
+
+def filter_duration(activity_list: list):
+    return sorted(activity_list, key=get_duration_as_int)
+```
+
+Now I'm reviewing the function that sorts activity_list by "estimated_minutes" to understand why the current sorting line fails and how to correctly convert the string values to integers before sorting. I want to clarify the key extraction and conversion logic to fix the sorting behavior.
+
+**Requirements**
+
+**Overview & Goals**
+The goal is to sort a list of activity dictionaries loaded from `activities.csv` by either date or duration (`estimated_minutes`) while maintaining each activity dictionary's integrity (keeping all fields together).
+
+**Scope**
+- **In Scope:**
+  - Sorting the list of dictionaries directly using a custom sorting key.
+  - Converting numeric string fields to integers and date string fields to datetime objects for accurate comparison.
+  - Allowing flexible sorting by either date or duration.
+- **Out of Scope:**
+  - Modifying the CSV schema or altering the underlying CSV file structure.
+  - Modifying other unrelated helper functions in `oppgave_5_helpers.py`.
+
+**Functional Requirements**
+- Retain all dictionary attributes (`title`, `category`, `date`, `estimated_minutes`, `status`) in each record after sorting.
+- Sort durations numerically (e.g. 30 < 90 < 120).
+- Sort dates chronologically based on parsed date values.
+
+**Technical Design**
+
+**Current Implementation**
+In `oppgave_5_helpers.py`, `read_file` reads rows as a list of dictionaries with string values via `csv.DictReader`. Currently, `filter_date_or_duration` creates two separate lists with list comprehensions (`dates` and `durations`), sorting them independently and losing the association with other activity fields.
+
+**Key Decisions**
+- **In-place vs New List:** Use `sorted()` with a `key` parameter to return a new sorted list of dictionaries without mutating the original list.
+- **Key Extraction & Type Casting:**
+  - For duration: cast `int(row["estimated_minutes"])` inside the key function.
+  - For date: parse the date string using `datetime.strptime` to guarantee accurate chronological comparison regardless of date separator formats.
+
+**Proposed Changes**
+- Update `filter_date_or_duration(activity_list, sort_by)` to sort full dictionaries based on the chosen attribute (`"date"` or `"estimated_minutes"`).
+- Pass appropriate key transformations to Python's `sorted()` function.
+
+**File Structure**
+- `oppgave_5_helpers.py`: Update `filter_date_or_duration` implementation.
+- `oppgave_5_program.py`: Call and display sorted activity lists.
+
+**Testing**
+
+**Validation Approach**
+Verify sorting functionality with representative dataset records containing multi-digit numbers and various dates.
+
+**Key Scenarios**
+- **Numeric Duration Sorting:** Verify that activities with durations like 30, 90, and 120 minutes sort in numeric order (30, 90, 120) instead of alphabetical order (120, 30, 90).
+- **Date Sorting:** Verify that activities with dates across different months and years sort in chronological sequence.
+- **Dictionary Integrity:** Verify that each element in the resulting list retains all original keys and values.
+
+**Delivery Steps**
+
+**Step 1: Implement value transformation logic for sorting keys**
+Implement helper logic or key functions to extract and convert dictionary values for proper numeric and chronological sorting.
+
+- Define integer conversion logic for `estimated_minutes` to ensure numeric comparison rather than lexicographical string comparison.
+- Define datetime parsing logic using `datetime.strptime` to ensure accurate chronological date sorting.
+- Handle potential malformed entries or formatting inconsistencies gracefully.
+
+**Step 2: Refactor filter_date_or_duration to sort dictionary list**
+Update the sorting function in `oppgave_5_helpers.py` so that full activity dictionaries are sorted and returned.
+
+- Refactor `filter_date_or_duration` to accept criteria (such as sorting by date or duration, and optional sort order).
+- Use `sorted()` with the appropriate `key` parameter to sort the list of dictionaries without breaking apart the dictionary records.
+- Verify that calling `filter_date_or_duration` in `oppgave_5_program.py` prints the activities in the expected sorted order.
+
+**subprompt**
+"Kan du bryte ned og forklare den alternativ a for meg"
+
+**svar**
+
+**Forklaring av Alternativ A**
+
+Koden vi ser på er:
+
+```python
+def filter_duration(activity_list: list):
+    return sorted(activity_list, key=lambda x: int(x["estimated_minutes"]))
+```
+
+La oss bryte denne linjen ned i sine enkeltdeler slik at det blir tydelig nøyaktig hva Python gjør bak kulissene.
+
+---
+
+**1. Hovedkomponentene i uttrykket**
+
+Uttrykket består av tre hoveddeler:
+
+1. `sorted(...)`: Pythons innebygde funksjon for å sortere elementer og returnere en ny liste.
+2. `activity_list`: Selve listen som skal sorteres. Hvert element i denne listen er en ordbok (`dict`) som representerer en aktivitet.
+3. `key=...`: Parameteret som forteller Python *hvilken verdi* den skal bruke til å sammenligne elementene.
+
+---
+
+**2. Hva er en `lambda`?**
+
+En `lambda` er en liten, anonym funksjon (en funksjon uten et definert navn via `def`) som skrives på én enkelt linje.
+
+Følgende to måter å skrive en funksjon på gjør nøyaktig det samme:
+
+```python
+# Vanlig funksjon med def:
+def hent_varighet(x):
+    return int(x["estimated_minutes"])
+
+# Lambda-funksjon:
+lambda x: int(x["estimated_minutes"])
+```
+
+Fordelen med `lambda` her er at du slipper å opprette en egen funksjon utenfor linjen når du bare trenger logikken ett enkelt sted.
+
+---
+
+**3. Steg for steg: Hva skjer under kjøring?**
+
+Når `sorted()` kjører på `activity_list`, gjør den følgende for **hvert eneste element** i listen:
+
+1. **`x` representerer det gjeldende elementet:**  
+   Siden `activity_list` er en liste med ordbøker, er `x` en ordbok, for eksempel:  
+   `x = {"title": "Løpetur", "date": "10.05.2024", "estimated_minutes": "45", "status": "completed"}`
+
+2. **Henter ut verdien:**  
+   `x["estimated_minutes"]` slår opp nøkkelen og henter ut tekstverdien `"45"`.
+
+3. **Konverterer til heltall:**  
+   `int("45")` konverterer strengen `"45"` til heltallet `45`.
+
+4. **Sammenligning og sortering:**  
+   Python bruker tallet `45` som grunnlag for å plassere hele ordboken i riktig rekkefølge i forhold til de andre ordbøkene.
+
+---
+
+**4. Hvorfor er `int(...)` nødvendig her?**
+
+CSV-modulen leser alle verdier som tekststrenger (`str`). 
+
+- **Uten `int()` (tekstsortering):**  
+  Tekststrenger sammenlignes alfabetisk tegn for tegn. Da vil `"120"` havne før `"30"` og `"90"` fordi tegnet `'1'` kommer før `'3'` i alfabetet.
+- **Med `int()` (tallsortering):**  
+  Når verdiene gjøres om til tall (`int`), sammenlignes de matematisk: `30 < 45 < 90 < 120`.
+
+> **Merk:** Selve ordboken og verdiene i den blir ikke permanent endret. `int(...)` brukes kun midlertidig av Python for å vite hvilken rekkefølge ordbøkene skal legges i. Resultatlisten inneholder fortsatt de komplette ordbøkene med alle sine opprinnelige felter intakt.
+
+**subprompt**
+"Korleis veit lambda at x er for ordbøkene i lista? Kva er logikken (sidan det vanlegvis i ei løkke vil vere "for row in activity_list")"
+
+**svar**
+**Korleis `lambda` mottek ordbøkene frå lista**
+
+For å oppnå maksimal nytte og forståing av korleis dette heng saman, er det mest føremålstenleg å sjå på korleis ansvarsfordelinga mellom `sorted()` og `lambda` fungerer i praksis.
+
+Kort sagt: Det er **`sorted()`-funksjonen** som styrer løkka internt, medan **`lambda`** berre tek imot eitt og eitt element som `sorted()` sender inn.
+
+---
+
+**1. `x` er berre eit valt parameternamn**
+
+Når du skriv:
+```python
+lambda x: int(x["estimated_minutes"])
+```
+så er `x` berre eit tilfeldig vald namn på inndata-parameteren. Du kan like gjerne kalle parameteren `row` eller `activity` for å gjere koden meir sjølvforklarande og redusere kognitiv belastning:
+
+```python
+lambda row: int(row["estimated_minutes"])
+```
+
+Dette tilsvarar nøyaktig ein vanleg funksjon:
+```python
+def hent_varighet(row):
+    return int(row["estimated_minutes"])
+```
+
+---
+
+**2. Kva gjer `sorted()` under panseret?**
+
+Det er `sorted()` som veit kva som ligg i `activity_list`. Når du sender inn `key=...`, køyrer `sorted()` ei innebygd, optimalisert løkke over lista di.
+
+Logikken `sorted()` utfører internt kan illustrerast slik:
+
+```python
+# Slik fungerer logikken internt i Python (forenkla modell):
+midlertidige_par = []
+
+for row in activity_list:
+    # Her kallar sorted() nøkkelfunksjonen din med kvar ordbok:
+    sorteringsnokkel = nøkkelfunksjon(row)  # row blir sendt inn som 'x'
+    midlertidige_par.append((sorteringsnokkel, row))
+
+# Sorterer basert på den utrekna nøkkelen
+midlertidige_par.sort()
+
+# Pakkar ut dei originale ordbøkene i rett rekkjefølgje
+sortert_liste = [row for sorteringsnokkel, row in midlertidige_par]
+```
+
+---
+
+**3. Samanlikning: Vanleg løkke vs. `key`-funksjon**
+
+| Konsept | Korleis elementet vert handtert |
+| :--- | :--- |
+| **Vanleg `for`-løkke** | Du skriv løkka manuelt: `for row in activity_list:` og vel kva som skal skje med `row`. |
+| **`sorted(..., key=...)`** | `sorted()` køyrer løkka for deg i rask C-kode på lågt nivå, og sender kvart `row` rett inn som argument til funksjonen du oppgav som `key`. |
+
+**Oppsummering av nytteverdien**
+
+- `lambda` veit ikkje kva den får inn på førehand; den forventar berre eit objekt som den kan gjere oppslag i.
+- `sorted()` veit kva lista inneheld, itererer gjennom kvart element, og mater det inn i funksjonen.
+- Dette mønsteret minimerer boilerplate-kode, aukar køyresnøggleiken og sikrar at dataa vert handsama konsistent utan manuelle løkker.
 
 
 

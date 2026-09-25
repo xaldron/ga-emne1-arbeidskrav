@@ -9,14 +9,17 @@ if __name__ == '__main__':
         path = data_folder / "activities.csv"
         print(path.exists())
 
-
-        #with open(path, "w", newline='', encoding="utf-8") as file:
-            #fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
-            #writer = csv.DictWriter(file, fieldnames=fieldnames)
-            #writer.writeheader()
-
         my_list = read_file(path)
-        filter_status(my_list,"completed")
+
+
+        with open(path, "w", newline='', encoding="utf-8") as file:
+            fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(my_list)
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 from datetime import datetime
 #Planning to use csv writer to save activities to file
 import csv
+from operator import itemgetter
 from collections import Counter
 
 # Class
@@ -89,6 +90,7 @@ def append_to_file(activity_dict, file_path):
     except FileNotFoundError, FileExistsError, PermissionError:
         print("Error: Det ser ut som filen ikke eksisterer, eller at du ikke har tilgang til den.")
 
+
 def read_file(file_path):
 
     rows = []
@@ -101,6 +103,7 @@ def read_file(file_path):
             return rows
     except FileNotFoundError, FileExistsError, PermissionError:
         print("Error: Det ser ut som filen ikke eksisterer, eller at du ikke har tilgang til den..")
+
 
 def search_title_or_category(activity_list: list) -> None:
 
@@ -117,6 +120,7 @@ def search_title_or_category(activity_list: list) -> None:
         else:
             continue
 
+
 def filter_status(activity_list: list, status: str) -> None:
 
 
@@ -128,6 +132,16 @@ def filter_status(activity_list: list, status: str) -> None:
                 f"* Estimert varighet i minutter: {row["estimated_minutes"]}\n"
                 f"* Status: {row["status"]}")
             print()
+
+# Ide om itemgetter hentet fra oppgave 2
+def filter_date(activity_list: list):
+    return sorted(activity_list, key=itemgetter("date"))
+
+
+def filter_duration(activity_list: list):
+    return sorted(activity_list, key=lambda row: int(x["estimated_minutes"]))
+
+
 
 
 
