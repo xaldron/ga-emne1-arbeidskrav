@@ -21,6 +21,30 @@ Helt til slutt i arbeidet har jeg også benyttet Junie til å rydde, formatere o
 
 ---
 
+## Git og versjonskontroll
+
+Prosjektet er versjonskontrollert under hele utviklingen med jevnlige og beskrivende commits. Hele Git-historikken ligger vedlagt i den medfølgende `.git`-mappen.
+
+*GitHub-lenke:* [https://github.com/xaldron/ga-emne1-arbeidskrav](https://github.com/xaldron/ga-emne1-arbeidskrav)
+
+Utdrag fra commit-historikken:
+```text
+* 662bda2 Added more program menu functions
+* 1850588 Added more program menu functions
+* 6b607bb Made changes to some functions task 5
+* b789803 Added more functions to the task.
+* 941a09c Added first class and functions to task 5. Added program.py to start working on main program and for test purposes.
+* f737c4f Added completed task 4.
+* dd3b097 Added finished subtask 4.3 to task 4
+* edda9e6 Added task 3 documentation to readme
+* ef98947 completed task 3
+* aea1658 Added comments to the second assignment in readme
+* edf395f Added all functions to second task
+* e3d8d82 Added first task (completed)
+```
+
+---
+
 ## Oppgave 1
 
 Her har jeg lykkes med ambisjonen min om å ikke bruke KI i løsningen. 
@@ -558,523 +582,231 @@ Her er en oversikt over feilene funnet i den opprinnelige koden og hvordan de bl
 
 ---
 
-## Oppgave 5
+## Oppgave 5: Aktivitetsplanlegger (Påbegynt / Videre arbeid)
 
-Dokumentasjon/kilder brukt: 
-https://docs.python.org/3/library/csv.html
+> **Status og merknad:** Oppgave 5 er ikke ferdigstilt ennå. Likevel har jeg inkludert koden jeg har skrevet så langt (`oppgave_5_helpers.py`, `oppgave_5_program.py` og `data/activities.csv`), tilhørende commits og push i Git, samt fullstendig KI-dokumentasjon, slik at sensor kan se fremgangen og arbeidet som er gjort så langt dersom det er ønskelig.
 
-
-
-
-
-
-
+### Eksterne kilder
+- **Offisiell Python-dokumentasjon:** [Python CSV Library Documentation](https://docs.python.org/3/library/csv.html)
 
 ### Dokumentasjon av KI-bruk (Oppgave 5)
 
-
 <details>
-<summary><b>Endringsforslag på "add_dict" etter spørsmål om validering</b></summary>
+<summary><b>1) Evaluering og refaktorering av add_dict() til Activity.to_dict()</b></summary>
 
-**Prompt 1 (Validere add_dict):**
-> - *"Var det lurt med den add_dict funksjonen?"* 
+**Prompt:**
+> *«Var det lurt med den add_dict funksjonen?»*
 
 **Svar:**
-> - * Now I'm opening the main program file to understand its overall structure and key functions, so I can identify where to implement or analyze the core logic needed for the task.
-
-**Vurdering av `add_dict`-funksjonen**
-
-Tanken bak funksjonen er **helt super**, spesielt hvis planen er å bruke `csv.DictWriter` til å lagre aktivitetene til CSV-fil! Det å konvertere et objekt til en `dict` er en veldig vanlig og god måte å klargjøre data for lagring eller eksport på.
-
-Likevel er det tre konkrete ting som kan forbedres for å gjøre koden enda mer ryddig og etter beste praksis for objektorientert programmering (OOP):
-
----
-
-**1. Gjør det til en metode inne i `Activity`-klassen (Anbefalt)**  
-I objektorientert programmering er det vanlig at objektet selv «vet» hvordan det skal konvertere sine egne data. 
-
-I stedet for en frittstående funksjon `add_dict(activity)`, er det mer ryddig å legge det som en metode inne i `Activity`-klassen, for eksempel `activity.to_dict()`:
-
-```python
-class Activity:
-    def __init__(self, title: str, category: str, date: datetime, estimated_minutes: int, status):
-        self.title = title
-        self.category = category
-        self.date = date
-        self.estimated_minutes = estimated_minutes
-        self.status = status
-
-    def show_info(self):
-        '''Prints out the activity attributes with a f-string format'''
-        print(f"   -- {self.title} --")
-        print(f"* Kategori: {self.category}")
-        print(f"* Dato: {self.date}")
-        print(f"* Estimert varighet i minutter: {self.estimated_minutes}")
-        print(f"* Status: {self.status}")
-
-    def to_dict(self):
-        '''Returns activity attributes as a dictionary'''
-        return {
-            "title": self.title,
-            "category": self.category,
-            "date": self.date,
-            "estimated_minutes": self.estimated_minutes,
-            "status": self.status
-        }
-```
-
-Da kan du i hovedprogrammet enkelt skrive:
-```python
-my_dict = new_activity.to_dict()
-```
-
----
-
-**2. Navngiving (`to_dict` i stedet for `add_dict`)**  
-Navnet `add_dict` gir inntrykk av at funksjonen *legger til* noe i en liste eller database (som `add`). Siden funksjonen faktisk *konverterer/returnerer* objektet som en dictionary, er navn som `to_dict()` eller `as_dict()` standard og mer selvforklarende.
-
----
-
-**3. Konsekvente nøkkelnavn (liten `d` på `date`)**  
-I den nåværende koden har `"Date"` stor forbokstav, mens de andre feltene har små forbokstaver:
-```python
-# Nåværende:
-new_dict = {"title": activity.title, "category": activity.category, "Date": activity.date, ...}
-
-# Anbefalt (små bokstaver overalt):
-new_dict = {"title": activity.title, "category": activity.category, "date": activity.date, ...}
-```
-Det er best å bruke konsekvent lowercase på feltnavn, slik at overskriftene i CSV-filen blir ensartede (f.eks. `title,category,date,estimated_minutes,status`).
-
----
-
-**Oppsummering**
-* **Var idéen lur?** Ja, konseptet er midt i blinken for CSV-skriving.
-* **Beste justering:** Flytt den inn i klassen som metoden `def to_dict(self):`, rett `"Date"` til `"date"`, og kall den med `aktivitet.to_dict()`.*
-
-
+> **Vurdering av `add_dict`-funksjonen**
+>
+> Tanken bak funksjonen er **helt super**, spesielt hvis planen er å bruke `csv.DictWriter` til å lagre aktivitetene til CSV-fil! Det å konvertere et objekt til en `dict` er en veldig vanlig og god måte å klargjøre data for lagring eller eksport på.
+>
+> Likevel er det tre konkrete ting som kan forbedres for å gjøre koden enda mer ryddig og etter beste praksis for objektorientert programmering (OOP):
+>
+> **1. Gjør det til en metode inne i `Activity`-klassen (Anbefalt)**  
+> I objektorientert programmering er det vanlig at objektet selv «vet» hvordan det skal konvertere sine egne data. 
+> 
+> I stedet for en frittstående funksjon `add_dict(activity)`, er det mer ryddig å legge det som en metode inne i `Activity`-klassen, for eksempel `activity.to_dict()`:
+> 
+> ```python
+> class Activity:
+>     def __init__(self, title: str, category: str, date: datetime, estimated_minutes: int, status):
+>         self.title = title
+>         self.category = category
+>         self.date = date
+>         self.estimated_minutes = estimated_minutes
+>         self.status = status
+> 
+>     def show_info(self):
+>         '''Prints out the activity attributes with a f-string format'''
+>         print(f"   -- {self.title} --")
+>         print(f"* Kategori: {self.category}")
+>         print(f"* Dato: {self.date}")
+>         print(f"* Estimert varighet i minutter: {self.estimated_minutes}")
+>         print(f"* Status: {self.status}")
+> 
+>     def to_dict(self):
+>         '''Returns activity attributes as a dictionary'''
+>         return {
+>             "title": self.title,
+>             "category": self.category,
+>             "date": self.date,
+>             "estimated_minutes": self.estimated_minutes,
+>             "status": self.status
+>         }
+> ```
+> 
+> Da kan du i hovedprogrammet enkelt skrive:
+> ```python
+> my_dict = new_activity.to_dict()
+> ```
+>
+> **2. Navngiving (`to_dict` i stedet for `add_dict`)**  
+> Navnet `add_dict` gir inntrykk av at funksjonen *legger til* noe i en liste eller database (som `add`). Siden funksjonen faktisk *konverterer/returnerer* objektet som en dictionary, er navn som `to_dict()` eller `as_dict()` standard og mer selvforklarende.
+>
+> **3. Konsekvente nøkkelnavn (liten `d` på `date`)**  
+> I den nåværende koden har `"Date"` stor forbokstav, mens de andre feltene har små forbokstaver:
+> ```python
+> # Nåværende:
+> new_dict = {"title": activity.title, "category": activity.category, "Date": activity.date, ...}
+> 
+> # Anbefalt (små bokstaver overalt):
+> new_dict = {"title": activity.title, "category": activity.category, "date": activity.date, ...}
+> ```
+> Det er best å bruke konsekvent lowercase på feltnavn, slik at overskriftene i CSV-filen blir ensartede (f.eks. `title,category,date,estimated_minutes,status`).
+>
+> **Oppsummering**
+> - **Var idéen lur?** Ja, konseptet er midt i blinken for CSV-skriving.
+> - **Beste justering:** Flytt den inn i klassen som metoden `def to_dict(self):`, rett `"Date"` til `"date"`, og kall den med `aktivitet.to_dict()`.
 </details>
 
-**Prompt 2:**
-"Kvifor får eg denne typerror-feilmeldinga? Eg prøver å gjere det som offisiell dokumentasjon forklarer, så eg skjøner ikkje kva dette er for noko?"
+<details>
+<summary><b>2) Feilretting av TypeError i DictWriter.writerow() og overskriving av variabelnavn</b></summary>
+
+**Prompt:**
+> *«Kvifor får eg denne typerror-feilmeldinga? Eg prøver å gjere det som offisiell dokumentasjon forklarer, så eg skjøner ikkje kva dette er for noko?»*
 
 **Svar:**
-Update to v3419.7.0 failed
+> Feilmeldinga (`TypeError`) skuldast at metoden `writer.writerow()` manglar eit påkravd argument.
+>
+> **Kva som forårsakar `TypeError`:**
+> I `oppgave_5_helpers.py` har du skrive følgjande i funksjonen `append_to_file`:
+> ```python
+> def append_to_file(dict, path):
+>     with open(path, "a", encoding="utf-8", newline='') as path:
+>         fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+>         writer = csv.DictWriter(path, fieldnames=fieldnames)
+>         writer.writerow()  # <-- Feilen oppstår her!
+> ```
+> Når du brukar `csv.DictWriter`, krev `writer.writerow()` at du sender med **dictionaryen** som inneheld verdiane som skal skrivast inn i raden. 
+> 
+> Når parentesen er tom (`writer.writerow()`), gir Python feilen:  
+> `TypeError: DictWriter.writerow() missing 1 required positional argument: 'rowdict'`
+>
+> **Slik løyser du det:**
+> Du må sende med dictionary-objektet som argument til `writer.writerow(...)`:
+> ```python
+> def append_to_file(activity_dict, file_path):
+>     with open(file_path, "a", encoding="utf-8", newline='') as file:
+>         fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+>         writer = csv.DictWriter(file, fieldnames=fieldnames)
+>         writer.writerow(activity_dict)
+> ```
+>
+> **Nyttige forbetringar i koden:**
+> 1. **Variabelnamn overskygger kvarandre (`as file` i staden for `as path`):**
+>    I både `oppgave_5_program.py` og `oppgave_5_helpers.py` stod det `with open(path, ...) as path:`. Her heiter filstien `path`, men så gir du også sjølve fil-objektet namnet `path`. Bruk heller `as file` eller `as f` for fil-objektet slik at stien og fila ikkje blandast saman. Unngå også å kalle parametere for `dict`, sidan det overskygger Pythons innebygde `dict`-klasse.
+> 2. **Ulik filsti i hovudprogrammet:**
+>    I `oppgave_5_program.py` opprettar du headeren i mappa `data/activities.csv` via variabelen `path`. Send difor med variabelen `path` (ikkje berre filnamnet `"activities.csv"`) når du kallar `append_to_file(my_dict, path)` slik at fila hamnar i `data/`.
 
-Feilmeldinga (`TypeError`) skuldast at metoden `writer.writerow()` manglar eit påkravd argument.
+**Oppfølgingsprompt:**
+> *«Ok, eg har endra det som du påpeiker. Men, eg får fortsatt:»*
+> ```text
+> Traceback (most recent call last):
+>   File "C:\Users\Studier\PycharmProjects\GA\Emne1\ga-emne1-arbeidskrav\oppgave_5_program.py", line 21, in <module>
+>     append_to_file(my_dict, path)
+>   File "C:\Users\Studier\PycharmProjects\GA\Emne1\ga-emne1-arbeidskrav\oppgave_5_helpers.py", line 49, in append_to_file
+>     with open(file_path, "a", encoding="utf-8", newline='') as file:
+> TypeError: expected str, bytes or os.PathLike object, not TextIOWrapper
+> ```
 
----
-
-**Kva som forårsakar `TypeError`**
-
-I `oppgave_5_helpers.py` har du skrive følgjande i funksjonen `append_to_file`:
-
-```python
-def append_to_file(dict, path):
-    with open(path, "a", encoding="utf-8", newline='') as path:
-        fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
-        writer = csv.DictWriter(path, fieldnames=fieldnames)
-        writer.writerow()  # <-- Feilen oppstår her!
-```
-
-Når du brukar `csv.DictWriter`, krev `writer.writerow()` at du sender med **dictionaryen** som inneheld verdiane som skal skrivast inn i raden. 
-
-Når parentesen er tom (`writer.writerow()`), gir Python feilen:  
-`TypeError: DictWriter.writerow() missing 1 required positional argument: 'rowdict'`
-
----
-
-**Slik løyser du det**
-
-Du må sende med dictionary-objektet som argument til `writer.writerow(...)`:
-
-```python
-def append_to_file(activity_dict, file_path):
-    with open(file_path, "a", encoding="utf-8", newline='') as file:
-        fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writerow(activity_dict)
-```
-
----
-
-**Nyttige forbetringar i koden**
-
-1. **Variabelnamn overskygger kvarandre (`as file` i staden for `as path`):**
-   I både `oppgave_5_program.py` og `oppgave_5_helpers.py` står det:
-   ```python
-   with open(path, "w", ...) as path:
-   ```
-   Her heiter filstien `path`, men så gir du også sjølve fil-objektet namnet `path`. Bruk heller `as file` eller `as f` for fil-objektet slik at stien og fila ikkje blandast saman. Unngå også å kalle parametere for `dict`, sidan det overskygger Pythons innebygde `dict`-klasse.
-
-2. **Ulik filsti i hovudprogrammet:**
-   I `oppgave_5_program.py` opprettar du headeren i mappa `data/activities.csv` via variabelen `path`:
-   ```python
-   path = data_folder / "activities.csv"
-   ```
-   Men når du kallar `append_to_file`, sender du inn strengen `"activities.csv"`:
-   ```python
-   append_to_file(my_dict, "activities.csv")
-   ```
-   Dette gjer at dataa hamnar i ei ny fil i rotmappa i staden for under `data/`. Send heller med variabelen `path`:
-   ```python
-   append_to_file(my_dict, path)
-   ```
-   
-**Subprompt:**
-Ok, eg har endra det som du påpeiker. Men, eg får fortsatt: 
-"Traceback (most recent call last):
-  File "C:\Users\Studier\PycharmProjects\GA\Emne1\ga-emne1-arbeidskrav\oppgave_5_program.py", line 21, in <module>
-    append_to_file(my_dict, path)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
-  File "C:\Users\Studier\PycharmProjects\GA\Emne1\ga-emne1-arbeidskrav\oppgave_5_helpers.py", line 49, in append_to_file
-    with open(file_path, "a", encoding="utf-8", newline='') as file:
-         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: expected str, bytes or os.PathLike object, not TextIOWrapper"
 **Svar:**
-**Kva som forårsakar denne feilmeldinga**
+> **Kva som forårsakar denne feilmeldinga:**
+> Feilen skuldast at variabelen `path` i `oppgave_5_program.py` blir overskriven og omgjort frå ein filsti til eit fil-objekt (`TextIOWrapper`):
+> 
+> 1. Først definerer du stien: `path = data_folder / "activities.csv"`
+> 2. Så overskriv du variabelen i `with`: `with open(path, ...) as path:`
+> 3. Når du skriv `as path`, peikar `path` no på fil-objektet (som no er lukka), og ikkje på filstien lenger.
+> 4. Når `append_to_file(my_dict, path)` køyrer, forventar `open(file_path)` ein filsti, men får eit `TextIOWrapper`-objekt.
+> 
+> **Slik løyser du det:**
+> Endre `as path` til `as file` (eller `as f`) i `oppgave_5_program.py` slik at du ikkje overskriv sti-variabelen `path`:
+> ```python
+> with open(path, "w", newline='', encoding="utf-8") as file:
+>     fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
+>     writer = csv.DictWriter(file, fieldnames=fieldnames)
+>     writer.writeheader()
+> 
+> append_to_file(my_dict, path)
+> ```
+</details>
 
-Feilen skuldast at variabelen `path` i `oppgave_5_program.py` blir overskriven og omgjort frå ein filsti til eit fil-objekt (`TextIOWrapper`).
+<details>
+<summary><b>3) Sortering av aktiviteter etter varighet og forståelse av lambda i sorted()</b></summary>
 
----
+**Prompt:**
+> ```python
+> return sorted(activity_list, key=itemgetter(int("estimated_minutes")))
+> ```
+> *«Kvifor fungerer ikkje dette?»*
 
-**Forklaring steg for steg**
+**Svar:**
+> **Hvorfor koden feiler:**
+> 1. **`int("estimated_minutes")` kaster en `ValueError`:** Python forsøker å konvertere selve tekststrengen `"estimated_minutes"` (ordet) til et heltall, noe som kaster `ValueError: invalid literal for int() with base 10: 'estimated_minutes'`.
+> 2. **`itemgetter` kan ikke transformere data underveis:** `itemgetter("estimated_minutes")` kan ikke kalle `int()` på verdiene den henter ut. Siden verdiene fra CSV er tekststrenger (`"90"`, `"30"`, `"120"`), ville en ren `itemgetter` sortert tallene alfabetisk som tekst i stedet for numerisk.
+>
+> **Hvordan løse det:**
+> - **Alternativ A: Med en `lambda`-funksjon:**
+>   ```python
+>   def filter_duration(activity_list: list):
+>       return sorted(activity_list, key=lambda x: int(x["estimated_minutes"]))
+>   ```
+> - **Alternativ B: Med en vanlig hjelpefunksjon (`def`):**
+>   ```python
+>   def get_duration_as_int(activity: dict) -> int:
+>       return int(activity["estimated_minutes"])
+> 
+>   def filter_duration(activity_list: list):
+>       return sorted(activity_list, key=get_duration_as_int)
+>   ```
 
-1. **Først definerer du stien:**
-   ```python
-   path = data_folder / "activities.csv"  # Her er path eit Path-objekt (en gyldig filsti)
-   ```
+**Oppfølgingsprompt 1:**
+> *«Kan du bryte ned og forklare den alternativ a for meg»*
 
-2. **Så overskriv du variabelen i `with`:**
-   ```python
-   with open(path, "w", newline='', encoding="utf-8") as path:  # <-- Her overskriv `as path` variabelen!
-       fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
-       writer = csv.DictWriter(path, fieldnames=fieldnames)
-       writer.writeheader()
-   ```
-   Når du skriv `as path`, set Python variabelen `path` lik det opna fil-objektet (`TextIOWrapper`). Sjølv etter at `with`-blokka er ferdig, peikar `path` framleis på fil-objektet (som no er lukka), og ikkje på filstien lenger.
+**Svar:**
+> **Forklaring av Alternativ A (`sorted(activity_list, key=lambda x: int(x["estimated_minutes"]))`):**
+>
+> 1. **Hovedkomponentene i uttrykket:**
+>    - `sorted(...)`: Pythons innebygde funksjon for å sortere elementer og returnere en ny liste.
+>    - `activity_list`: Selve listen som skal sorteres (hvert element er en `dict`).
+>    - `key=...`: Parameteret som forteller Python hvilken verdi den skal sammenligne elementene etter.
+>
+> 2. **Hva er en `lambda`?**  
+>    En `lambda` er en liten, anonym funksjon på én linje: `lambda x: int(x["estimated_minutes"])` tilsvarer en vanlig funksjon `def hent_varighet(x): return int(x["estimated_minutes"])`.
+>
+> 3. **Hva skjer under kjøring?**  
+>    For hvert element (`x`) i listen slår Python opp `x["estimated_minutes"]` (f.eks. `"45"`), konverterer til heltall `45`, og sorterer ordbøkene matematisk basert på dette tallet.
+>
+> 4. **Hvorfor `int(...)` er nødvendig:**  
+>    Uten `int()` sammenlignes strengene alfabetisk (`"120"` før `"30"`). Med `int()` sammenlignes de numerisk (`30 < 45 < 120`). Ordboken i seg selv blir ikke endret; `int()` brukes kun midlertidig under sorteringen.
 
-3. **Du sender fil-objektet inn i hjelpefunksjonen:**
-   ```python
-   append_to_file(my_dict, path)  # Sender inn TextIOWrapper i staden for filstien
-   ```
+**Oppfølgingsprompt 2:**
+> *«Korleis veit lambda at x er for ordbøkene i lista? Kva er logikken (sidan det vanlegvis i ei løkke vil vere "for row in activity_list")»*
 
-4. **Krasjet oppstår i hjelpefunksjonen:**
-   Inne i `oppgave_5_helpers.py` prøver du å opne fila på nytt:
-   ```python
-   with open(file_path, "a", encoding="utf-8", newline='') as file:
-   ```
-   Her forventar `open()` ein streng eller eit `Path`-objekt (ein filsti), men får i staden inn `TextIOWrapper`-objektet du sende med. Då kastar Python feilen:
-   `TypeError: expected str, bytes or os.PathLike object, not TextIOWrapper`
-
----
-
-**Slik løyser du det**
-
-Endre `as path` til `as file` (eller `as f`) i `oppgave_5_program.py` slik at du ikkje overskriv sti-variabelen `path`:
-
-```python
-with open(path, "w", newline='', encoding="utf-8") as file:
-    fieldnames = ["title", "category", "date", "estimated_minutes", "status"]
-    writer = csv.DictWriter(file, fieldnames=fieldnames)
-    writer.writeheader()
-
-append_to_file(my_dict, path)
-```
-
-Når du no kallar `append_to_file(my_dict, path)`, er `path` framleis den opphavlege `Path`-stien til fila.
-
-
-**prompt med subprompts**
-`return sorted(activity_list, key=itemgetter(int("estimated_minutes")))`
-
-Kvifor fungerer ikkje dette? 
-
-**svar med subprompts**
-**Hvorfor koden feiler**
-
-Det er to hovedgrunner til at linjen `return sorted(activity_list, key=itemgetter(int("estimated_minutes")))` ikke fungerer:
-
----
-
-**1. `int("estimated_minutes")` kaster en `ValueError`**
-Når Python leser uttrykket, kjøres `int("estimated_minutes")` med en gang.   
-Her forsøker `int()` å konvertere selve tekststrengen `"estimated_minutes"` (altså bokstavene i ordet) til et heltall. Siden ordet ikke består av siffer, krasjer programmet umiddelbart med en feilmelding:  
-`ValueError: invalid literal for int() with base 10: 'estimated_minutes'`
-
----
-
-**2. `itemgetter` kan ikke transformere data underveis**
-`itemgetter("estimated_minutes")` fungerer som en snarvei for å hente ut verdien til en nøkkel, tilsvarende `ordbok["estimated_minutes"]`.   
-Den kan derimot **ikke** kjøre funksjoner (som `int()`) på verdien den henter ut. Siden verdiene fra CSV-filen er tekststrenger (`"90"`, `"30"`, `"120"`), ville en ren `itemgetter` sortert tallene alfabetisk som tekst i stedet for numerisk.
-
----
-
-**Hvordan løse det**
-
-For å gjøre om verdien til et heltall før `sorted()` sammenligner elementene, må du hente ut verdien fra ordboken først, og deretter kalle `int()` på den hentede verdien.
-
-Dette kan gjøres på to måter:
-
-**Alternativ A: Med en `lambda`-funksjon**
-En `lambda` tar inn hver ordbok (`x`), slår opp nøkkelen `"estimated_minutes"`, og gjør verdien om til `int`:
-```python
-def filter_duration(activity_list: list):
-    return sorted(activity_list, key=lambda x: int(x["estimated_minutes"]))
-```
-
-**Alternativ B: Med en vanlig hjelpefunksjon (`def`)**
-Hvis du foretrekker vanlige funksjoner fremfor `lambda`:
-```python
-def get_duration_as_int(activity: dict) -> int:
-    return int(activity["estimated_minutes"])
-
-def filter_duration(activity_list: list):
-    return sorted(activity_list, key=get_duration_as_int)
-```
-
-Now I'm reviewing the function that sorts activity_list by "estimated_minutes" to understand why the current sorting line fails and how to correctly convert the string values to integers before sorting. I want to clarify the key extraction and conversion logic to fix the sorting behavior.
-
-**Requirements**
-
-**Overview & Goals**
-The goal is to sort a list of activity dictionaries loaded from `activities.csv` by either date or duration (`estimated_minutes`) while maintaining each activity dictionary's integrity (keeping all fields together).
-
-**Scope**
-- **In Scope:**
-  - Sorting the list of dictionaries directly using a custom sorting key.
-  - Converting numeric string fields to integers and date string fields to datetime objects for accurate comparison.
-  - Allowing flexible sorting by either date or duration.
-- **Out of Scope:**
-  - Modifying the CSV schema or altering the underlying CSV file structure.
-  - Modifying other unrelated helper functions in `oppgave_5_helpers.py`.
-
-**Functional Requirements**
-- Retain all dictionary attributes (`title`, `category`, `date`, `estimated_minutes`, `status`) in each record after sorting.
-- Sort durations numerically (e.g. 30 < 90 < 120).
-- Sort dates chronologically based on parsed date values.
-
-**Technical Design**
-
-**Current Implementation**
-In `oppgave_5_helpers.py`, `read_file` reads rows as a list of dictionaries with string values via `csv.DictReader`. Currently, `filter_date_or_duration` creates two separate lists with list comprehensions (`dates` and `durations`), sorting them independently and losing the association with other activity fields.
-
-**Key Decisions**
-- **In-place vs New List:** Use `sorted()` with a `key` parameter to return a new sorted list of dictionaries without mutating the original list.
-- **Key Extraction & Type Casting:**
-  - For duration: cast `int(row["estimated_minutes"])` inside the key function.
-  - For date: parse the date string using `datetime.strptime` to guarantee accurate chronological comparison regardless of date separator formats.
-
-**Proposed Changes**
-- Update `filter_date_or_duration(activity_list, sort_by)` to sort full dictionaries based on the chosen attribute (`"date"` or `"estimated_minutes"`).
-- Pass appropriate key transformations to Python's `sorted()` function.
-
-**File Structure**
-- `oppgave_5_helpers.py`: Update `filter_date_or_duration` implementation.
-- `oppgave_5_program.py`: Call and display sorted activity lists.
-
-**Testing**
-
-**Validation Approach**
-Verify sorting functionality with representative dataset records containing multi-digit numbers and various dates.
-
-**Key Scenarios**
-- **Numeric Duration Sorting:** Verify that activities with durations like 30, 90, and 120 minutes sort in numeric order (30, 90, 120) instead of alphabetical order (120, 30, 90).
-- **Date Sorting:** Verify that activities with dates across different months and years sort in chronological sequence.
-- **Dictionary Integrity:** Verify that each element in the resulting list retains all original keys and values.
-
-**Delivery Steps**
-
-**Step 1: Implement value transformation logic for sorting keys**
-Implement helper logic or key functions to extract and convert dictionary values for proper numeric and chronological sorting.
-
-- Define integer conversion logic for `estimated_minutes` to ensure numeric comparison rather than lexicographical string comparison.
-- Define datetime parsing logic using `datetime.strptime` to ensure accurate chronological date sorting.
-- Handle potential malformed entries or formatting inconsistencies gracefully.
-
-**Step 2: Refactor filter_date_or_duration to sort dictionary list**
-Update the sorting function in `oppgave_5_helpers.py` so that full activity dictionaries are sorted and returned.
-
-- Refactor `filter_date_or_duration` to accept criteria (such as sorting by date or duration, and optional sort order).
-- Use `sorted()` with the appropriate `key` parameter to sort the list of dictionaries without breaking apart the dictionary records.
-- Verify that calling `filter_date_or_duration` in `oppgave_5_program.py` prints the activities in the expected sorted order.
-
-**subprompt**
-"Kan du bryte ned og forklare den alternativ a for meg"
-
-**svar**
-
-**Forklaring av Alternativ A**
-
-Koden vi ser på er:
-
-```python
-def filter_duration(activity_list: list):
-    return sorted(activity_list, key=lambda x: int(x["estimated_minutes"]))
-```
-
-La oss bryte denne linjen ned i sine enkeltdeler slik at det blir tydelig nøyaktig hva Python gjør bak kulissene.
+**Svar:**
+> **Korleis `lambda` mottek ordbøkene frå lista:**
+>
+> 1. **`x` er berre eit valt parameternamn:**  
+>    Du kan like gjerne kalle det `row` eller `activity` (`lambda row: int(row["estimated_minutes"])`).
+> 
+> 2. **`sorted()` styrer løkka under panseret:**  
+>    Det er `sorted()` som itererer gjennom `activity_list` og mater kvart element inn som argument til funksjonen du oppgav som `key`.
+> 
+> 3. **Samanlikning:**
+>    - **Vanleg `for`-løkke:** Du skriv løkka manuelt: `for row in activity_list:`.
+>    - **`sorted(..., key=...)`:** `sorted()` køyrer løkka for deg i rask, intern C-kode og sender kvart element inn til nøkkelfunksjonen.
+</details>
 
 ---
 
-**1. Hovedkomponentene i uttrykket**
+## Oppgave 6: Videodemonstrasjon
 
-Uttrykket består av tre hoveddeler:
+Som en del av arbeidskravet er det spilt inn en kort video som demonstrerer et av programmene/oppgavene i prosjektet i praksis.
 
-1. `sorted(...)`: Pythons innebygde funksjon for å sortere elementer og returnere en ny liste.
-2. `activity_list`: Selve listen som skal sorteres. Hvert element i denne listen er en ordbok (`dict`) som representerer en aktivitet.
-3. `key=...`: Parameteret som forteller Python *hvilken verdi* den skal bruke til å sammenligne elementene.
+* **Videolenke (YouTube):** [https://youtu.be/QXh63lFc6Jo](https://youtu.be/QXh63lFc6Jo)
 
 ---
-
-**2. Hva er en `lambda`?**
-
-En `lambda` er en liten, anonym funksjon (en funksjon uten et definert navn via `def`) som skrives på én enkelt linje.
-
-Følgende to måter å skrive en funksjon på gjør nøyaktig det samme:
-
-```python
-# Vanlig funksjon med def:
-def hent_varighet(x):
-    return int(x["estimated_minutes"])
-
-# Lambda-funksjon:
-lambda x: int(x["estimated_minutes"])
-```
-
-Fordelen med `lambda` her er at du slipper å opprette en egen funksjon utenfor linjen når du bare trenger logikken ett enkelt sted.
-
----
-
-**3. Steg for steg: Hva skjer under kjøring?**
-
-Når `sorted()` kjører på `activity_list`, gjør den følgende for **hvert eneste element** i listen:
-
-1. **`x` representerer det gjeldende elementet:**  
-   Siden `activity_list` er en liste med ordbøker, er `x` en ordbok, for eksempel:  
-   `x = {"title": "Løpetur", "date": "10.05.2024", "estimated_minutes": "45", "status": "completed"}`
-
-2. **Henter ut verdien:**  
-   `x["estimated_minutes"]` slår opp nøkkelen og henter ut tekstverdien `"45"`.
-
-3. **Konverterer til heltall:**  
-   `int("45")` konverterer strengen `"45"` til heltallet `45`.
-
-4. **Sammenligning og sortering:**  
-   Python bruker tallet `45` som grunnlag for å plassere hele ordboken i riktig rekkefølge i forhold til de andre ordbøkene.
-
----
-
-**4. Hvorfor er `int(...)` nødvendig her?**
-
-CSV-modulen leser alle verdier som tekststrenger (`str`). 
-
-- **Uten `int()` (tekstsortering):**  
-  Tekststrenger sammenlignes alfabetisk tegn for tegn. Da vil `"120"` havne før `"30"` og `"90"` fordi tegnet `'1'` kommer før `'3'` i alfabetet.
-- **Med `int()` (tallsortering):**  
-  Når verdiene gjøres om til tall (`int`), sammenlignes de matematisk: `30 < 45 < 90 < 120`.
-
-> **Merk:** Selve ordboken og verdiene i den blir ikke permanent endret. `int(...)` brukes kun midlertidig av Python for å vite hvilken rekkefølge ordbøkene skal legges i. Resultatlisten inneholder fortsatt de komplette ordbøkene med alle sine opprinnelige felter intakt.
-
-**subprompt**
-"Korleis veit lambda at x er for ordbøkene i lista? Kva er logikken (sidan det vanlegvis i ei løkke vil vere "for row in activity_list")"
-
-**svar**
-**Korleis `lambda` mottek ordbøkene frå lista**
-
-For å oppnå maksimal nytte og forståing av korleis dette heng saman, er det mest føremålstenleg å sjå på korleis ansvarsfordelinga mellom `sorted()` og `lambda` fungerer i praksis.
-
-Kort sagt: Det er **`sorted()`-funksjonen** som styrer løkka internt, medan **`lambda`** berre tek imot eitt og eitt element som `sorted()` sender inn.
-
----
-
-**1. `x` er berre eit valt parameternamn**
-
-Når du skriv:
-```python
-lambda x: int(x["estimated_minutes"])
-```
-så er `x` berre eit tilfeldig vald namn på inndata-parameteren. Du kan like gjerne kalle parameteren `row` eller `activity` for å gjere koden meir sjølvforklarande og redusere kognitiv belastning:
-
-```python
-lambda row: int(row["estimated_minutes"])
-```
-
-Dette tilsvarar nøyaktig ein vanleg funksjon:
-```python
-def hent_varighet(row):
-    return int(row["estimated_minutes"])
-```
-
----
-
-**2. Kva gjer `sorted()` under panseret?**
-
-Det er `sorted()` som veit kva som ligg i `activity_list`. Når du sender inn `key=...`, køyrer `sorted()` ei innebygd, optimalisert løkke over lista di.
-
-Logikken `sorted()` utfører internt kan illustrerast slik:
-
-```python
-# Slik fungerer logikken internt i Python (forenkla modell):
-midlertidige_par = []
-
-for row in activity_list:
-    # Her kallar sorted() nøkkelfunksjonen din med kvar ordbok:
-    sorteringsnokkel = nøkkelfunksjon(row)  # row blir sendt inn som 'x'
-    midlertidige_par.append((sorteringsnokkel, row))
-
-# Sorterer basert på den utrekna nøkkelen
-midlertidige_par.sort()
-
-# Pakkar ut dei originale ordbøkene i rett rekkjefølgje
-sortert_liste = [row for sorteringsnokkel, row in midlertidige_par]
-```
-
----
-
-**3. Samanlikning: Vanleg løkke vs. `key`-funksjon**
-
-| Konsept | Korleis elementet vert handtert |
-| :--- | :--- |
-| **Vanleg `for`-løkke** | Du skriv løkka manuelt: `for row in activity_list:` og vel kva som skal skje med `row`. |
-| **`sorted(..., key=...)`** | `sorted()` køyrer løkka for deg i rask C-kode på lågt nivå, og sender kvart `row` rett inn som argument til funksjonen du oppgav som `key`. |
-
-**Oppsummering av nytteverdien**
-
-- `lambda` veit ikkje kva den får inn på førehand; den forventar berre eit objekt som den kan gjere oppslag i.
-- `sorted()` veit kva lista inneheld, itererer gjennom kvart element, og mater det inn i funksjonen.
-- Dette mønsteret minimerer boilerplate-kode, aukar køyresnøggleiken og sikrar at dataa vert handsama konsistent utan manuelle løkker.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Dokumentasjon av KI til opprydding og strukturering av README
 
