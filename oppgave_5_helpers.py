@@ -13,6 +13,13 @@ class Activity:
         self.estimated_minutes = estimated_minutes
         self.status = status
 
+    def __str__(self) -> str:
+        return (f"  == {self.title} ==\n"
+                f"* Kategori: {self.category}\n"
+                f"* Dato: {self.date}\n"
+                f"* Estimert varighet i minutter: {self.estimated_minutes}\n"
+                f"* Status: {self.status}")
+
     def show_info(self):
         '''Prints out the activity attributes with a f-string format'''
         print(f"   == {self.title} ==")
@@ -87,15 +94,7 @@ def append_to_file(activity_dict, file_path):
     except FileNotFoundError, FileExistsError, PermissionError:
         print("Error: Looks like the file does not exist, or you do not have permission to write to it.")
 
-# Fortsett med denne (ikkje ferdig)!
-def show_activities(file_path):
-    with open(file_path, "r", encoding="utf-8") as file:
-        content = csv.DictReader(file)
-        for row in content:
-            if "title" in row.keys():
-                print(f"Tittel: {row['title']}")
-            else:
-                print("I'm a temporary print statement")
+
 
 
 

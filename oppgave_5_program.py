@@ -17,7 +17,8 @@ my_test = Activity("Testing", "Coding", "23.09.2026", 15, "planned")
 my_dict = my_test.to_dict()
 append_to_file(my_dict, path)
 
-show_activities(path)
+
+print(my_test)
 
 
 
